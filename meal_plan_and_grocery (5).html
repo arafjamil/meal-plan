@@ -1,0 +1,2664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="My Meal Plan">
+<meta name="theme-color" content="#f5f4f0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>My Meal Plan</title>
+<style>
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{-webkit-tap-highlight-color:transparent;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f4f0;color:#1a1a18;min-height:100vh}
+.app-header{padding:1.25rem 1.5rem 0.75rem}
+h1{font-size:20px;font-weight:500;margin-bottom:3px}
+.subtitle{font-size:13px;color:#888780}
+.main-tabs{display:flex;border-bottom:0.5px solid #d3d1c7;padding:0 1.5rem;background:#f5f4f0}
+.main-tab{font-size:13px;font-weight:500;padding:10px 16px;border:none;background:transparent;color:#888780;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-0.5px}
+.main-tab.active{color:#1a1a18;border-bottom-color:#1a1a18}
+.main-panel{display:none;padding:1.25rem 1.5rem}
+.main-panel.active{display:block}
+.sub-nav{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:16px}
+.sub-btn{font-size:12px;padding:5px 13px;border-radius:20px;border:0.5px solid #d3d1c7;background:transparent;color:#5f5e5a;cursor:pointer;font-family:inherit}
+.sub-btn.active{background:#e8e7e3;color:#1a1a18;font-weight:500;border-color:#888780}
+.sub-panel{display:none}.sub-panel.active{display:block}
+.cl{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:500;color:#888780;text-transform:uppercase;letter-spacing:0.06em;padding:8px 0 6px;border-bottom:0.5px solid #d3d1c7;margin-bottom:12px}
+.cldot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.recipe{background:#fff;border:0.5px solid #d3d1c7;border-radius:12px;padding:16px 18px;margin-bottom:10px}
+.recipe.excluded{opacity:0.4}
+.recipe.excluded .r-title{text-decoration:line-through;color:#888780}
+.r-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:11px;padding-bottom:10px;border-bottom:0.5px solid #e8e7e3}
+.r-header-left{flex:1;min-width:0}
+.r-title{font-size:14px;font-weight:500;color:#1a1a18;margin-bottom:4px}
+.r-meta{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:4px}
+.badge{font-size:11px;padding:2px 7px;border-radius:20px;background:#e8e7e3;color:#5f5e5a}
+.tags{display:flex;gap:4px;flex-wrap:wrap}
+.tag{font-size:11px;padding:2px 6px;border-radius:20px;font-weight:500}
+.t-iron{background:#FCEBEB;color:#791F1F}.t-anti{background:#E1F5EE;color:#085041}
+.t-thyroid{background:#E6F1FB;color:#0C447C}.t-gut{background:#FAEEDA;color:#633806}
+.t-vc{background:#EEEDFE;color:#3C3489}.t-pro{background:#EAF3DE;color:#27500A}
+.swap-badge,.new-badge{font-size:10px;padding:1px 6px;border-radius:20px;font-weight:500;margin-left:6px;vertical-align:middle}
+.swap-badge{background:#FAEEDA;color:#633806}
+.new-badge{background:#E1F5EE;color:#085041}
+.rc{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.inc-wrap{display:flex;align-items:center;gap:6px}
+.inc-lbl{font-size:11px;color:#888780;white-space:nowrap}
+.tog{position:relative;width:34px;height:19px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0}
+.sl{position:absolute;cursor:pointer;inset:0;background:#d3d1c7;border-radius:19px;transition:.2s}
+.sl:before{position:absolute;content:"";height:14px;width:14px;left:2.5px;bottom:2.5px;background:#fff;border-radius:50%;transition:.2s}
+.tog input:checked+.sl{background:#1D9E75}
+.tog input:checked+.sl:before{transform:translateX(15px)}
+.srv-wrap{display:flex;border:0.5px solid #d3d1c7;border-radius:6px;overflow:hidden;height:22px}
+.srv{font-size:11px;padding:0 9px;height:100%;border:none;background:transparent;color:#888780;cursor:pointer;font-family:inherit;font-weight:500}
+.srv.active{background:#1a1a18;color:#fff}
+.days-wrap{display:flex;flex-direction:column;gap:4px;margin-top:4px}
+.days-lbl{font-size:11px;color:#888780;white-space:nowrap}
+.p1days,.p2days{display:flex;align-items:center;gap:5px}
+.days-ctrl{display:flex;align-items:center;border:0.5px solid #d3d1c7;border-radius:6px;overflow:hidden;height:22px}
+.days-btn{font-size:13px;width:22px;height:100%;border:none;background:transparent;color:#5f5e5a;cursor:pointer;font-family:inherit;font-weight:500;line-height:1;display:flex;align-items:center;justify-content:center}
+.days-btn:hover{background:#e8e7e3}
+.days-val{font-size:12px;font-weight:500;color:#1a1a18;min-width:18px;text-align:center;line-height:22px}
+.scale-annot{margin-top:8px;padding:5px 10px;background:#E6F1FB;border-radius:7px;font-size:11px;color:#0C447C;line-height:1.6}
+.del-btn{font-size:11px;padding:2px 8px;border-radius:20px;border:0.5px solid #f5c2c2;background:transparent;color:#C0392B;cursor:pointer;font-family:inherit;margin-top:2px;opacity:0.7}
+.del-btn:hover{background:#FCEBEB;opacity:1}
+.r-body{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:540px){.r-body{grid-template-columns:1fr}}
+.r-section-title{font-size:11px;font-weight:500;color:#888780;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:7px}
+.ing-item{font-size:12px;color:#444441;padding:3px 0;border-bottom:0.5px solid #f0efeb;line-height:1.4}
+.ing-item:last-child{border-bottom:none}
+.ing-amt{font-weight:500;color:#1a1a18;min-width:60px;display:inline-block}
+.step{display:flex;gap:8px;padding:5px 0;border-bottom:0.5px solid #f0efeb}
+.step:last-child{border-bottom:none}
+.step-num{width:18px;height:18px;border-radius:50%;background:#e8e7e3;font-size:10px;font-weight:500;color:#5f5e5a;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-text{font-size:12px;color:#444441;line-height:1.5}
+.tip{margin-top:10px;padding:8px 11px;background:#f0efeb;border-radius:8px;font-size:11px;color:#444441;line-height:1.5}
+.tip-label{font-weight:500;color:#1a1a18;font-size:11px}
+.grocery-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.prog-wrap{flex:1;min-width:160px}
+.prog-label{font-size:12px;color:#888780;margin-bottom:5px}
+.prog-bar{height:5px;background:#d3d1c7;border-radius:3px}
+.prog-fill{height:100%;background:#1D9E75;border-radius:3px;transition:width .25s}
+.btn-row{display:flex;gap:6px}
+.btn-sm{font-size:12px;padding:5px 12px;border-radius:8px;border:0.5px solid #d3d1c7;background:transparent;color:#5f5e5a;cursor:pointer;font-family:inherit}
+.btn-sm:hover{background:#e8e7e3}
+.cat-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+.cat-tab{font-size:12px;padding:5px 12px;border-radius:20px;border:0.5px solid #d3d1c7;background:transparent;color:#5f5e5a;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px}
+.cat-tab.active{border-color:#888780;background:#e8e7e3;color:#1a1a18;font-weight:500}
+.cdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.gpanel{display:none}.gpanel.active{display:block}
+.sec-lbl{font-size:11px;font-weight:500;color:#888780;text-transform:uppercase;letter-spacing:0.06em;padding:7px 0 5px;border-bottom:0.5px solid #d3d1c7;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:2px;margin-bottom:8px}
+.gi{display:flex;align-items:flex-start;gap:9px;padding:7px 10px;border-radius:8px;cursor:pointer;background:#fff;transition:background .1s;user-select:none;min-height:44px}
+.gi:hover{background:#f0efeb}
+.gi.chk{opacity:0.4}
+.gi.chk .giname{text-decoration:line-through}
+.gi input{margin-top:2px;cursor:pointer;flex-shrink:0;accent-color:#1D9E75;pointer-events:none}
+.gicontent{flex:1}
+.giname{font-size:13px;color:#1a1a18;line-height:1.3}
+.giqty{font-size:11px;color:#888780;margin-top:1px}
+.mt{display:inline-block;font-size:10px;padding:1px 5px;border-radius:4px;margin-left:4px;font-weight:500;vertical-align:middle}
+.mt-bf{background:#FAEEDA;color:#633806}.mt-lu{background:#E1F5EE;color:#085041}
+.mt-di{background:#E6F1FB;color:#0C447C}.mt-sn{background:#EEEDFE;color:#3C3489}
+.mt-tr{background:#FCEBEB;color:#791F1F}
+.excl-bar{font-size:12px;color:#5f5e5a;background:#f0efeb;border-radius:8px;padding:8px 12px;margin-bottom:12px;display:none}
+.excl-bar.show{display:block}
+.prep-note{font-size:12px;color:#5f5e5a;background:#f0efeb;border-radius:8px;padding:8px 12px;margin-bottom:14px}
+.prep-summary{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.prep-stat{background:#fff;border:0.5px solid #d3d1c7;border-radius:10px;padding:10px 16px;flex:1;min-width:80px;text-align:center}
+.prep-stat-val{font-size:20px;font-weight:500;color:#1a1a18}
+.prep-stat-lbl{font-size:11px;color:#888780;margin-top:2px}
+.prep-slot-hd{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:500;color:#888780;text-transform:uppercase;letter-spacing:0.06em;padding:8px 0 6px;border-bottom:0.5px solid #d3d1c7;margin-bottom:10px;margin-top:6px}
+.pc{background:#fff;border:0.5px solid #d3d1c7;border-radius:12px;padding:14px 16px;margin-bottom:8px}
+.pc.done{opacity:0.45}
+.pc.done .ptitle{text-decoration:line-through;color:#888780}
+.pctop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.ptitle{font-size:14px;font-weight:500;color:#1a1a18;margin-bottom:3px}
+.pdesc{font-size:12px;color:#888780;line-height:1.45;margin-bottom:6px}
+.pbadges{display:flex;gap:5px;flex-wrap:wrap}
+.psteps{display:none;margin-top:10px;border-top:0.5px solid #e8e7e3;padding-top:10px}
+.psteps.open{display:block}
+.pstep{display:flex;gap:8px;padding:4px 0;border-bottom:0.5px solid #f0efeb}
+.pstep:last-child{border-bottom:none}
+.psnum{width:18px;height:18px;border-radius:50%;background:#e8e7e3;font-size:10px;font-weight:500;color:#5f5e5a;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.pstxt{font-size:12px;color:#444441;line-height:1.5}
+.ptip{margin-top:8px;padding:7px 10px;background:#f0efeb;border-radius:8px;font-size:11px;color:#444441;line-height:1.5}
+.pcbtns{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.show-btn{font-size:11px;padding:3px 10px;border-radius:20px;border:0.5px solid #d3d1c7;background:transparent;color:#5f5e5a;cursor:pointer;font-family:inherit}
+.show-btn:hover{background:#e8e7e3}
+.done-wrap{display:flex;align-items:center;gap:6px;margin-top:8px}
+.done-wrap input{accent-color:#1D9E75;width:15px;height:15px;cursor:pointer}
+.done-wrap label{font-size:12px;color:#5f5e5a;cursor:pointer}
+.prep-empty{padding:2rem 0;text-align:center;font-size:13px;color:#888780}
+
+
+/* ── Mobile optimizations ── */
+@media(max-width:640px){
+  /* Layout */
+  body{font-size:15px}
+  .app-header{padding:1rem 1rem 0.6rem}
+  h1{font-size:18px}
+  .main-panel{padding:1rem}
+
+  /* Main tabs — full width, larger touch targets */
+  .main-tabs{padding:0 0.5rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .main-tabs::-webkit-scrollbar{display:none}
+  .main-tab{font-size:13px;padding:12px 14px;white-space:nowrap}
+
+  /* Recipe sub-nav — scrollable */
+  .sub-nav{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px}
+  .sub-nav::-webkit-scrollbar{display:none}
+  .sub-btn{font-size:13px;padding:8px 16px;white-space:nowrap;flex-shrink:0}
+
+  /* Recipe cards */
+  .recipe{padding:14px}
+  .r-header{flex-wrap:wrap;gap:10px}
+  .r-header-left{min-width:0;width:100%}
+  .r-title{font-size:15px}
+  .r-body{grid-template-columns:1fr;gap:16px}
+
+  /* Recipe controls — horizontal row on mobile */
+  .rc{flex-direction:row;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px;width:100%}
+  .inc-wrap{gap:8px}
+  .inc-lbl{font-size:12px}
+  .srv-wrap{height:32px}
+  .srv{font-size:12px;padding:0 12px;height:100%}
+  .days-wrap{flex-direction:row;align-items:center;flex-wrap:wrap;gap:6px}
+  .p1days,.p2days{gap:6px}
+  .days-lbl{font-size:12px}
+  .days-ctrl{height:32px}
+  .days-btn{width:32px;font-size:15px}
+  .days-val{font-size:13px;min-width:22px}
+
+  /* Ingredient & step text */
+  .ing-item{font-size:14px;padding:6px 0}
+  .ing-amt{min-width:72px}
+  .step{padding:8px 0}
+  .step-num{width:22px;height:22px;font-size:12px;flex-shrink:0}
+  .step-text{font-size:13px}
+  .tip{font-size:12px;padding:10px 12px}
+  .r-section-title{font-size:12px;margin-bottom:10px}
+
+  /* Category label */
+  .cl{font-size:12px;padding:10px 0 8px}
+
+  /* Grocery list */
+  .grocery-top{flex-direction:column;align-items:flex-start;gap:8px}
+  .prog-wrap{width:100%}
+  .btn-row{width:100%}
+  .btn-sm{flex:1;justify-content:center;padding:10px 12px;font-size:13px;text-align:center}
+  .cat-tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:4px}
+  .cat-tabs::-webkit-scrollbar{display:none}
+  .cat-tab{font-size:12px;padding:8px 12px;white-space:nowrap;flex-shrink:0}
+  .item-grid{grid-template-columns:1fr;gap:3px}
+  .gi{padding:11px 12px}
+  .giname{font-size:14px}
+  .giqty{font-size:12px;margin-top:3px}
+  .gi input{width:18px;height:18px;margin-top:3px}
+
+  /* Sunday prep */
+  .prep-summary{gap:8px}
+  .prep-stat{padding:10px 12px}
+  .prep-stat-val{font-size:18px}
+  .prep-slot-hd{font-size:12px}
+  .pc{padding:14px}
+  .pctop{flex-wrap:wrap;gap:8px}
+  .ptitle{font-size:15px}
+  .pdesc{font-size:13px}
+  .pcbtns{width:100%;align-items:flex-start}
+  .show-btn{font-size:13px;padding:8px 16px}
+  .pstep{padding:7px 0}
+  .psnum{width:22px;height:22px;font-size:12px;flex-shrink:0}
+  .pstxt{font-size:13px}
+  .ptip{font-size:12px;padding:9px 12px}
+  .done-wrap{margin-top:10px}
+  .done-wrap input{width:18px;height:18px}
+  .done-wrap label{font-size:13px}
+
+  /* Toggle switch — bigger for touch */
+  .tog{width:40px;height:23px}
+  .sl:before{width:17px;height:17px}
+  .tog input:checked+.sl:before{transform:translateX(17px)}
+
+  /* Scale annotation */
+  .scale-annot{font-size:12px;padding:7px 10px}
+}
+
+/* Extra small phones */
+@media(max-width:380px){
+  .main-tab{font-size:12px;padding:11px 12px}
+  .sub-btn{font-size:12px;padding:8px 13px}
+  .srv{font-size:11px;padding:0 9px}
+  .r-title{font-size:14px}
+}
+
+
+/* ── AI recipe finder ── */
+#main-ai{padding:1rem 1.5rem}
+.ai-header{margin-bottom:16px}
+.ai-header h2{font-size:16px;font-weight:500;color:#1a1a18;margin-bottom:4px}
+.ai-header p{font-size:13px;color:#888780}
+.ai-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.ai-filter-btn{font-size:12px;padding:5px 12px;border-radius:20px;border:0.5px solid #d3d1c7;background:transparent;color:#5f5e5a;cursor:pointer;font-family:inherit}
+.ai-filter-btn.on{background:#1a1a18;color:#fff;border-color:#1a1a18}
+.ai-input-row{display:flex;gap:8px;margin-bottom:16px}
+.ai-input{flex:1;font-size:14px;padding:10px 14px;border:0.5px solid #d3d1c7;border-radius:10px;font-family:inherit;background:#fff;color:#1a1a18;outline:none}
+.ai-input:focus{border-color:#888780}
+.ai-send-btn{font-size:13px;padding:10px 18px;border-radius:10px;border:none;background:#1a1a18;color:#fff;cursor:pointer;font-family:inherit;font-weight:500;white-space:nowrap}
+.ai-send-btn:disabled{opacity:0.4;cursor:not-allowed}
+.ai-history{display:flex;flex-direction:column;gap:12px}
+.ai-bubble{padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.6;max-width:100%}
+.ai-bubble.user{background:#1a1a18;color:#fff;align-self:flex-end;border-radius:12px 12px 4px 12px}
+.ai-bubble.assistant{background:#fff;border:0.5px solid #d3d1c7;color:#1a1a18;border-radius:12px 12px 12px 4px}
+.ai-bubble.thinking{background:#f0efeb;color:#888780;font-style:italic;border-radius:12px}
+.ai-recipe-card{background:#fff;border:0.5px solid #d3d1c7;border-radius:12px;padding:14px 16px;margin-top:8px}
+.ai-recipe-title{font-size:15px;font-weight:500;color:#1a1a18;margin-bottom:4px}
+.ai-recipe-meta{font-size:12px;color:#888780;margin-bottom:10px}
+.ai-recipe-section{font-size:11px;font-weight:500;color:#888780;text-transform:uppercase;letter-spacing:0.05em;margin:10px 0 6px;border-top:0.5px solid #e8e7e3;padding-top:8px}
+.ai-recipe-ing,.ai-recipe-step{font-size:13px;color:#444441;padding:3px 0;border-bottom:0.5px solid #f0efeb;line-height:1.5}
+.ai-recipe-ing:last-of-type,.ai-recipe-step:last-of-type{border-bottom:none}
+.ai-recipe-step{display:flex;gap:8px;align-items:flex-start}
+.ai-step-n{width:18px;height:18px;border-radius:50%;background:#e8e7e3;font-size:10px;font-weight:500;color:#5f5e5a;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.ai-add-btn{margin-top:12px;font-size:13px;padding:9px 18px;border-radius:10px;border:0.5px solid #1D9E75;background:#E1F5EE;color:#085041;cursor:pointer;font-family:inherit;font-weight:500;width:100%}
+.ai-add-btn:hover{background:#9FE1CB}
+.ai-add-btn.added{background:#e8e7e3;color:#888780;border-color:#d3d1c7;cursor:default}
+.ai-error{font-size:13px;color:#791F1F;background:#FCEBEB;padding:10px 14px;border-radius:10px}
+.ai-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.ai-chip{font-size:12px;padding:5px 12px;border-radius:20px;border:0.5px solid #d3d1c7;background:#f5f4f0;color:#5f5e5a;cursor:pointer;font-family:inherit}
+.ai-chip:hover{background:#e8e7e3}
+@media(max-width:640px){
+  #main-ai{padding:1rem}
+  .ai-input{font-size:16px}
+  .ai-send-btn{padding:10px 14px}
+}
+
+
+/* ── User switcher ── */
+.user-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 1.5rem;background:#fff;border-bottom:0.5px solid #d3d1c7;gap:10px;flex-wrap:wrap}
+.user-left{display:flex;align-items:center;gap:8px}
+.user-avatar{width:28px;height:28px;border-radius:50%;background:#1D9E75;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.user-name{font-size:13px;font-weight:500;color:#1a1a18}
+.user-switch-btn{font-size:12px;padding:4px 10px;border-radius:8px;border:0.5px solid #d3d1c7;background:transparent;color:#5f5e5a;cursor:pointer;font-family:inherit}
+.user-switch-btn:hover{background:#e8e7e3}
+.user-save-indicator{font-size:11px;color:#1D9E75;opacity:0;transition:opacity 0.3s}
+.user-save-indicator.show{opacity:1}
+
+/* User modal */
+.user-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1000;align-items:center;justify-content:center}
+.user-modal-bg.open{display:flex}
+.user-modal{background:#fff;border-radius:16px;padding:20px;width:min(340px,90vw);max-height:80vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.18)}
+.user-modal h3{font-size:16px;font-weight:500;margin-bottom:14px;color:#1a1a18}
+.user-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.user-list-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:0.5px solid #d3d1c7;cursor:pointer;transition:background .1s}
+.user-list-item:hover{background:#f5f4f0}
+.user-list-item.active-user{border-color:#1D9E75;background:#E1F5EE}
+.user-list-avatar{width:32px;height:32px;border-radius:50%;color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.user-list-name{font-size:13px;font-weight:500;color:#1a1a18;flex:1}
+.user-list-del{font-size:18px;color:#C0392B;opacity:0.5;background:none;border:none;cursor:pointer;padding:0 4px;line-height:1}
+.user-list-del:hover{opacity:1}
+.user-divider{height:0.5px;background:#d3d1c7;margin:10px 0}
+.user-add-row{display:flex;gap:8px}
+.user-add-input{flex:1;font-size:13px;padding:8px 12px;border:0.5px solid #d3d1c7;border-radius:8px;font-family:inherit;outline:none}
+.user-add-input:focus{border-color:#888780}
+.user-add-submit{font-size:13px;padding:8px 14px;border-radius:8px;border:none;background:#1a1a18;color:#fff;cursor:pointer;font-family:inherit;font-weight:500;white-space:nowrap}
+.user-modal-close{width:100%;margin-top:12px;font-size:13px;padding:10px;border-radius:10px;border:0.5px solid #d3d1c7;background:transparent;color:#5f5e5a;cursor:pointer;font-family:inherit}
+.user-modal-close:hover{background:#e8e7e3}
+
+@media(max-width:640px){
+  .user-bar{padding:8px 1rem}
+  .user-name{font-size:12px}
+}
+
+</style>
+</head>
+<body>
+<div class="app-header">
+  <h1>My meal plan</h1>
+  <p class="subtitle">Toggle recipes on/off and set x1 or x2 servings per recipe. Grocery list and prep plan update automatically.</p>
+</div>
+<div class="main-tabs">
+  <button class="main-tab active" onclick="showMain('recipes',this)">Recipes</button>
+  <button class="main-tab" onclick="showMain('grocery',this)">Grocery list</button>
+  <button class="main-tab" onclick="showMain('prep',this)">Sunday prep</button>
+  <button class="main-tab" onclick="showMain('ai',this)">Find a recipe</button>
+</div>
+<div id="api-notice" style="background:#E6F1FB;border-bottom:0.5px solid #B5D4F4;padding:9px 1.5rem;font-size:12px;color:#0C447C;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+  <span><strong>Find a recipe</strong> tab requires GitHub Pages hosting + Anthropic API key.
+  <a href="#" onclick="var s=document.getElementById('api-setup');s.style.display=s.style.display===''?'none':'';return false" style="color:#185FA5;font-weight:500">How to set up</a></span>
+  <button onclick="document.getElementById('api-notice').style.display='none'" style="border:none;background:transparent;color:#888780;cursor:pointer;font-size:22px;line-height:1;padding:0">&#215;</button>
+</div>
+<div id="api-setup" style="display:none;background:#fff;border-bottom:0.5px solid #d3d1c7;padding:14px 1.5rem;font-size:12px;color:#444441;line-height:1.9">
+  <strong style="display:block;margin-bottom:4px;font-size:13px;color:#1a1a18">One-time setup (about 5 minutes):</strong>
+  1. Host this file on GitHub Pages (rename to <code style="background:#f0efeb;padding:1px 5px;border-radius:4px">index.html</code>)<br>
+  2. Get a free API key at <a href="https://console.anthropic.com" target="_blank" style="color:#185FA5">console.anthropic.com</a><br>
+  3. Create a new file called <code style="background:#f0efeb;padding:1px 5px;border-radius:4px">config.js</code> in your repo with this content:<br>
+  <code style="display:block;background:#f0efeb;padding:8px 10px;border-radius:6px;margin:5px 0;font-family:monospace">window.ANTHROPIC_API_KEY = 'sk-ant-your-key-here';</code>
+  4. Add this line just before <code style="background:#f0efeb;padding:1px 5px;border-radius:4px">&lt;/body&gt;</code> in your index.html:<br>
+  <code style="display:block;background:#f0efeb;padding:8px 10px;border-radius:6px;margin:5px 0;font-family:monospace">&lt;script src="config.js"&gt;&lt;/script&gt;</code>
+  Once done, the Find a recipe tab will be fully live.
+</div>
+
+<div class="user-bar">
+  <div class="user-left">
+    <div class="user-avatar" id="user-avatar">?</div>
+    <span class="user-name" id="user-name-display">Loading...</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span class="user-save-indicator" id="save-indicator">Saved</span>
+    <button class="user-switch-btn" onclick="openUserModal()">Switch user</button>
+  </div>
+</div>
+
+<!-- User modal -->
+<div class="user-modal-bg" id="user-modal-bg" onclick="if(event.target===this)closeUserModal()">
+  <div class="user-modal">
+    <h3>Profiles</h3>
+    <div class="user-list" id="user-list"></div>
+    <div class="user-divider"></div>
+    <div class="user-add-row">
+      <input class="user-add-input" id="user-add-input" type="text" placeholder="New profile name..." maxlength="20" onkeydown="if(event.key==='Enter')addUser()">
+      <button class="user-add-submit" onclick="addUser()">Add</button>
+    </div>
+    <button class="user-modal-close" onclick="closeUserModal()">Done</button>
+  </div>
+</div>
+
+<div id="main-recipes" class="main-panel active">
+  <div class="sub-nav">
+    <button class="sub-btn active" onclick="showSub('bf',this)">Breakfasts</button>
+    <button class="sub-btn" onclick="showSub('lu',this)">Lunches</button>
+    <button class="sub-btn" onclick="showSub('di',this)">Dinners</button>
+    <button class="sub-btn" onclick="showSub('sn',this)">Snacks</button>
+    <button class="sub-btn" onclick="showSub('tr',this)">Treats</button>
+  </div>
+  <div id="sub-bf" class="sub-panel active">
+    <div class="cl"><div class="cldot" style="background:#639922"></div>Vegetarian</div>
+    <div class="recipe" data-recipe="smoothie-bowl">
+    <div class="r-header">
+      <div class="r-title">Sweet potato & banana smoothie bowl <span class="new-badge">new</span></div>
+      <div class="r-meta"><span class="badge">Serves 1</span><span class="badge">8 min</span></div>
+      <div class="tags"><span class="tag t-iron">iron</span><span class="tag t-vc">vitamin C</span><span class="tag t-gut">gentle GI</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">½ cup</span>cooked & cooled sweet potato</div>
+        <div class="ing-item"><span class="ing-amt">1 large</span>ripe frozen banana</div>
+        <div class="ing-item"><span class="ing-amt">½ cup</span>oat milk</div>
+        <div class="ing-item"><span class="ing-amt">½ tsp</span>ground cinnamon</div>
+        <div class="ing-item"><span class="ing-amt">¼ tsp</span>fresh ginger, grated</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>pumpkin seeds (topping)</div>
+        <div class="ing-item"><span class="ing-amt">½ cup</span>strawberries, sliced (topping)</div>
+        <div class="ing-item"><span class="ing-amt">squeeze</span>lemon juice</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Blend sweet potato, banana, oat milk, cinnamon, and ginger until very smooth and thick.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Pour into a bowl.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Top with sliced strawberries and pumpkin seeds.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Squeeze lemon juice over the top just before eating to boost iron absorption.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Iron without molasses</div>Sweet potato contributes iron and is very soothing on an irritated stomach. Pumpkin seeds add ~2.5mg iron per tablespoon. Strawberry + lemon = vitamin C to drive absorption.</div>
+  </div>
+    <div class="recipe" data-recipe="rice-porridge">
+    <div class="r-header">
+      <div class="r-title">Warm spiced banana & almond rice porridge <span class="new-badge">new</span></div>
+      <div class="r-meta"><span class="badge">Serves 1</span><span class="badge">12 min</span></div>
+      <div class="tags"><span class="tag t-gut">gentle GI</span><span class="tag t-iron">iron</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">½ cup</span>white rice (or leftover cooked rice)</div>
+        <div class="ing-item"><span class="ing-amt">1 cup</span>oat milk</div>
+        <div class="ing-item"><span class="ing-amt">1</span>ripe banana, mashed</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>almond butter</div>
+        <div class="ing-item"><span class="ing-amt">½ tsp</span>cinnamon</div>
+        <div class="ing-item"><span class="ing-amt">pinch</span>ground ginger</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>pumpkin seeds (topping)</div>
+        <div class="ing-item"><span class="ing-amt">½ cup</span>blueberries (topping)</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Combine rice and oat milk in a small saucepan over medium heat. For leftover rice, heat through with milk ~5 min. For raw rice, cook 15–18 min first.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Stir in mashed banana, cinnamon, and ginger. Cook 2 min until creamy.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Remove from heat. Stir in almond butter.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Pour into a bowl. Top with blueberries and pumpkin seeds.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Why rice porridge works for you</div>White rice is one of the most GI-gentle grains — low in fiber and very easy to digest during flares. Batch-cook rice on Sunday and this becomes a 5-minute morning meal.</div>
+  </div>
+    <div class="recipe" data-recipe="oat-smoothie">
+    <div class="r-header">
+      <div class="r-title">Banana oat smoothie</div>
+      <div class="r-meta"><span class="badge">Serves 1</span><span class="badge">5 min</span></div>
+      <div class="tags"><span class="tag t-gut">gentle GI</span><span class="tag t-iron">iron</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">1 large</span>ripe frozen banana</div>
+        <div class="ing-item"><span class="ing-amt">1 cup</span>oat milk</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>almond butter</div>
+        <div class="ing-item"><span class="ing-amt">1 handful</span>baby spinach</div>
+        <div class="ing-item"><span class="ing-amt">½ tsp</span>fresh ginger, grated</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>pumpkin seeds (optional blend-in)</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Add all ingredients to a blender.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Blend on high 45–60 seconds until completely smooth.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Drink immediately or store sealed in fridge up to 4 hours.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Oats are fine here</div>Blended oats in liquid form are very easy on the stomach — totally different from a bowl. Ginger helps with nausea. Spinach adds folate and iron without any taste.</div>
+  </div>
+    <div class="recipe" data-recipe="oat-pancakes">
+    <div class="r-header">
+      <div class="r-title">Oat pancakes with strawberries</div>
+      <div class="r-meta"><span class="badge">Serves 1–2</span><span class="badge">15 min</span></div>
+      <div class="tags"><span class="tag t-iron">iron</span><span class="tag t-gut">gentle GI</span><span class="tag t-vc">vitamin C</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">1 cup</span>rolled oats</div>
+        <div class="ing-item"><span class="ing-amt">¾ cup</span>oat milk</div>
+        <div class="ing-item"><span class="ing-amt">1 large</span>very ripe banana (binder)</div>
+        <div class="ing-item"><span class="ing-amt">½ tsp</span>cinnamon</div>
+        <div class="ing-item"><span class="ing-amt">1 tsp</span>olive oil (for pan)</div>
+        <div class="ing-item"><span class="ing-amt">½ cup</span>fresh strawberries, sliced</div>
+        <div class="ing-item"><span class="ing-amt">drizzle</span>honey or maple syrup (optional)</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Blend oats, oat milk, banana, and cinnamon until smooth. Rest 3 min.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Heat non-stick pan over medium-low with a little olive oil.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Pour small rounds (~¼ cup). Cook 2–3 min until edges set and bubbles appear.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Flip carefully. Cook 1–2 min more. Keep pancakes small — easier to flip.</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-text">Serve topped with sliced strawberries and a light drizzle of honey if desired.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">No eggs needed</div>The ripe banana acts as a binder and natural sweetener. The riper the banana, the better it holds the pancakes together.</div>
+  </div>
+    <div class="cl"><div class="cldot" style="background:#E24B4A"></div>Non-vegetarian</div>
+    <div class="recipe" data-recipe="salmon-rice-cakes">
+    <div class="r-header">
+      <div class="r-title">Avocado & smoked salmon rice cakes <span class="new-badge">new</span></div>
+      <div class="r-meta"><span class="badge">Serves 1</span><span class="badge">5 min</span></div>
+      <div class="tags"><span class="tag t-iron">iron</span><span class="tag t-thyroid">thyroid</span><span class="tag t-gut">gentle GI</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">2</span>plain rice cakes</div>
+        <div class="ing-item"><span class="ing-amt">½</span>ripe avocado</div>
+        <div class="ing-item"><span class="ing-amt">50g</span>smoked salmon</div>
+        <div class="ing-item"><span class="ing-amt">½</span>lemon, juiced</div>
+        <div class="ing-item"><span class="ing-amt">pinch</span>black pepper</div>
+        <div class="ing-item"><span class="ing-amt">½ cup</span>strawberries on the side</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Mash avocado with a fork. Season with lemon juice and black pepper.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Spread generously on each rice cake.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Lay smoked salmon slices on top.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Serve with strawberries or papaya on the side for vitamin C.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">A proper savory breakfast</div>Smoked salmon provides heme iron, omega-3s, and selenium for thyroid support — all in 5 minutes. Avocado supports hormone balance and is very gentle on the stomach.</div>
+  </div>
+  </div>
+  <div id="sub-lu" class="sub-panel">
+    <div class="cl"><div class="cldot" style="background:#639922"></div>Vegetarian</div>
+    <div class="recipe" data-recipe="lentil-soup">
+    <div class="r-header">
+      <div class="r-title">Red lentil & sweet potato soup</div>
+      <div class="r-meta"><span class="badge">Serves 1</span><span class="badge">30 min</span></div>
+      <div class="tags"><span class="tag t-iron">iron</span><span class="tag t-anti">anti-inflam</span><span class="tag t-gut">gentle GI</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">⅓ cup</span>red lentils, rinsed</div>
+        <div class="ing-item"><span class="ing-amt">½ medium</span>sweet potato, peeled & cubed</div>
+        <div class="ing-item"><span class="ing-amt">1 clove</span>garlic, minced</div>
+        <div class="ing-item"><span class="ing-amt">¼ tsp</span>ground turmeric</div>
+        <div class="ing-item"><span class="ing-amt">¼ tsp</span>ground cumin</div>
+        <div class="ing-item"><span class="ing-amt">1½ cups</span>low-sodium vegetable broth</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>olive oil</div>
+        <div class="ing-item"><span class="ing-amt">¼</span>lemon, juiced (at serving)</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Heat olive oil in a medium pot over medium heat. Add garlic and cook 1 min until fragrant.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Add turmeric and cumin. Stir 30 seconds until spices bloom.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Add rinsed lentils, sweet potato cubes, and broth. Stir to combine.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Bring to a boil, then reduce heat to low. Simmer uncovered 20–25 min until lentils and sweet potato are very soft.</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-text">Partially or fully blend with an immersion blender to desired texture.</div></div>
+        <div class="step"><div class="step-num">6</div><div class="step-text">Ladle into bowl. Squeeze lemon juice over just before eating.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Batch cooking tip</div>Make a full pot on Sunday and refrigerate up to 4 days, or freeze individual portions for up to 3 months.</div>
+  </div>
+    <div class="recipe" data-recipe="spinach-lentil-soup">
+    <div class="r-header">
+      <div class="r-title">Lentil soup with spinach</div>
+      <div class="r-meta"><span class="badge">Serves 1</span><span class="badge">35 min</span></div>
+      <div class="tags"><span class="tag t-iron">iron</span><span class="tag t-anti">anti-inflam</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">⅓ cup</span>green or brown lentils, rinsed</div>
+        <div class="ing-item"><span class="ing-amt">1 handful</span>fresh baby spinach</div>
+        <div class="ing-item"><span class="ing-amt">1 clove</span>garlic, minced</div>
+        <div class="ing-item"><span class="ing-amt">¼ tsp</span>ground cumin</div>
+        <div class="ing-item"><span class="ing-amt">pinch</span>turmeric</div>
+        <div class="ing-item"><span class="ing-amt">1½ cups</span>low-sodium vegetable broth</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>olive oil</div>
+        <div class="ing-item"><span class="ing-amt">¼</span>lemon, juiced</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Heat olive oil in a pot over medium. Cook garlic 1 min until softened.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Add cumin and turmeric. Stir 30 seconds.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Add lentils and broth. Bring to a boil, then simmer 25 min until lentils are fully tender.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Stir in spinach. Cook 1–2 min until wilted.</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-text">Remove from heat. Add lemon juice. Serve warm.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Iron tip</div>Cooked spinach provides more iron per serving than raw — heat breaks down oxalic acid which otherwise blocks some absorption. Lemon at the end seals the deal.</div>
+  </div>
+    <div class="recipe" data-recipe="miso-soup">
+    <div class="r-header">
+      <div class="r-title">Miso soup with tofu & rice</div>
+      <div class="r-meta"><span class="badge">Serves 1</span><span class="badge">10 min</span></div>
+      <div class="tags"><span class="tag t-pro">probiotic</span><span class="tag t-gut">gentle GI</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>low-sodium miso paste</div>
+        <div class="ing-item"><span class="ing-amt">1½ cups</span>hot (not boiling) water</div>
+        <div class="ing-item"><span class="ing-amt">½ block</span>soft tofu, cubed</div>
+        <div class="ing-item"><span class="ing-amt">2</span>scallions, thinly sliced</div>
+        <div class="ing-item"><span class="ing-amt">1 cup</span>cooked white rice (on the side)</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Heat water to just below boiling (~185°F / 85°C). Do not boil — boiling kills the probiotic cultures in miso.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Whisk miso paste into the hot water until fully dissolved.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Add cubed tofu. Heat gently 1–2 min.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Pour into a bowl. Top with sliced scallions. Serve with rice on the side.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Soy timing note</div>Keep miso to 1 serving — watch total soy intake with levothyroxine. Have this several hours after your morning thyroid medication.</div>
+  </div>
+    <div class="cl"><div class="cldot" style="background:#E24B4A"></div>Non-vegetarian</div>
+    <div class="recipe" data-recipe="chicken-bean-stew">
+    <div class="r-header">
+      <div class="r-title">Chicken & white bean stew</div>
+      <div class="r-meta"><span class="badge">Serves 1</span><span class="badge">35 min</span></div>
+      <div class="tags"><span class="tag t-iron">iron</span><span class="tag t-gut">gentle GI</span><span class="tag t-thyroid">thyroid</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">150g</span>boneless chicken thighs</div>
+        <div class="ing-item"><span class="ing-amt">⅓ can</span>white beans, drained & rinsed</div>
+        <div class="ing-item"><span class="ing-amt">1</span>carrot, sliced into rounds</div>
+        <div class="ing-item"><span class="ing-amt">½</span>zucchini, diced</div>
+        <div class="ing-item"><span class="ing-amt">1 clove</span>garlic, minced</div>
+        <div class="ing-item"><span class="ing-amt">1 cup</span>low-sodium chicken broth</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>olive oil</div>
+        <div class="ing-item"><span class="ing-amt">¼ tsp</span>dried thyme</div>
+        <div class="ing-item"><span class="ing-amt">¼ tsp</span>dried oregano</div>
+        <div class="ing-item"><span class="ing-amt">¼</span>lemon, juiced</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Cut chicken thighs into bite-size chunks. Season lightly with salt.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Heat olive oil in a pot over medium-high. Brown chicken 3–4 min per side. Remove and set aside.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">In the same pot, add garlic and cook 1 min. Add carrots and zucchini, stir 2 min.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Return chicken to pot. Add white beans, broth, thyme, and oregano.</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-text">Bring to a boil, then simmer 20 min until chicken is cooked through and vegetables are tender.</div></div>
+        <div class="step"><div class="step-num">6</div><div class="step-text">Stir in lemon juice. Serve as-is or over white rice.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Iron note</div>Chicken thighs have significantly more iron and zinc than chicken breast, and they stay more tender when slow-cooked.</div>
+  </div>
+    <div class="recipe" data-recipe="chicken-avocado-bowl">
+    <div class="r-header">
+      <div class="r-title">Chicken & avocado rice bowl <span class="swap-badge">was turkey</span></div>
+      <div class="r-meta"><span class="badge">Serves 1–2</span><span class="badge">20 min</span></div>
+      <div class="tags"><span class="tag t-iron">iron</span><span class="tag t-anti">anti-inflam</span><span class="tag t-gut">gentle GI</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">150g</span>boneless chicken thighs, diced</div>
+        <div class="ing-item"><span class="ing-amt">1 cup</span>cooked white rice</div>
+        <div class="ing-item"><span class="ing-amt">½</span>avocado, sliced</div>
+        <div class="ing-item"><span class="ing-amt">½</span>cucumber, sliced</div>
+        <div class="ing-item"><span class="ing-amt">1 clove</span>garlic, minced</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>olive oil</div>
+        <div class="ing-item"><span class="ing-amt">½</span>lemon, juiced</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Heat ½ tbsp olive oil in a pan over medium heat. Add garlic, cook 30 sec.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Add boneless chicken thighs, diced. Break apart and cook 8–10 min until fully cooked and lightly golden.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Place warm rice in a bowl. Top with cooked chicken.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Arrange avocado and cucumber alongside.</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-text">Drizzle remaining olive oil and lemon juice over everything. Serve immediately.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Chicken thigh vs breast</div>Ground chicken thigh has more iron and fat than breast — keeps it moist and more flavorful without any sauce needed.</div>
+  </div>
+    <div class="recipe" data-recipe="salmon-mash">
+    <div class="r-header">
+      <div class="r-title">Salmon & sweet potato mash</div>
+      <div class="r-meta"><span class="badge">Serves 1–2</span><span class="badge">25 min</span></div>
+      <div class="tags"><span class="tag t-thyroid">thyroid</span><span class="tag t-anti">anti-inflam</span><span class="tag t-gut">gentle GI</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">1 fillet</span>salmon (~150g)</div>
+        <div class="ing-item"><span class="ing-amt">1 large</span>sweet potato, peeled & cubed</div>
+        <div class="ing-item"><span class="ing-amt">2</span>carrots, sliced</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>olive oil</div>
+        <div class="ing-item"><span class="ing-amt">½</span>lemon, juiced</div>
+        <div class="ing-item"><span class="ing-amt">fresh parsley</span>to garnish</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Boil sweet potato cubes in lightly salted water 12–15 min until fork-tender. Drain and mash with ½ tbsp olive oil.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Steam sliced carrots 8 min until soft. Set aside.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Pat salmon dry. Season with salt, pepper, and a squeeze of lemon.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Heat remaining olive oil in a non-stick pan over medium-high. Place salmon skin-side up. Cook 3–4 min, flip, cook 3 min more until cooked through.</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-text">Plate mash, add carrots alongside, and rest salmon on top. Garnish with parsley.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Thyroid support</div>Salmon is one of the best food sources of selenium, critical for converting T4 to active T3 thyroid hormone — especially important while on levothyroxine.</div>
+  </div>
+    <div class="recipe" data-recipe="batch-stew">
+    <div class="r-header">
+      <div class="r-title">Sunday chicken & lentil stew (batch cook)</div>
+      <div class="r-meta"><span class="badge">Serves 1</span><span class="badge">45 min</span></div>
+      <div class="tags"><span class="tag t-iron">iron</span><span class="tag t-anti">anti-inflam</span><span class="tag t-gut">gentle GI</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">125g</span>boneless chicken thighs</div>
+        <div class="ing-item"><span class="ing-amt">¼ cup</span>red lentils, rinsed</div>
+        <div class="ing-item"><span class="ing-amt">½</span>carrot, diced</div>
+        <div class="ing-item"><span class="ing-amt">¼ medium</span>sweet potato, cubed</div>
+        <div class="ing-item"><span class="ing-amt">1 clove</span>garlic, minced</div>
+        <div class="ing-item"><span class="ing-amt">¼ tsp</span>ground turmeric</div>
+        <div class="ing-item"><span class="ing-amt">¼ tsp</span>ground cumin</div>
+        <div class="ing-item"><span class="ing-amt">1¼ cups</span>low-sodium chicken broth</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>olive oil</div>
+        <div class="ing-item"><span class="ing-amt">¼</span>lemon, juiced</div>
+        <div class="ing-item"><span class="ing-amt">fresh parsley</span>to finish</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Cut chicken into chunks. Heat oil in a large pot over medium-high. Brown chicken 4–5 min. Remove and set aside.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">In same pot, cook garlic 1 min. Add turmeric and cumin, stir 30 seconds.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Add carrots, sweet potato, and lentils. Stir to coat in spices.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Return chicken to pot. Pour in broth. Bring to a boil.</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-text">Reduce heat to low, cover, and simmer 25–30 min until lentils are dissolved and vegetables are tender.</div></div>
+        <div class="step"><div class="step-num">6</div><div class="step-text">Stir in lemon juice and fresh parsley. Taste and season. Serve over rice.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Meal prep</div>Store in 2-cup portions in airtight containers. Refrigerates 4 days, freezes up to 3 months. Reheat gently with a splash of water or broth.</div>
+  </div>
+  </div>
+  <div id="sub-di" class="sub-panel">
+    <div class="cl"><div class="cldot" style="background:#E24B4A"></div>Non-vegetarian</div>
+    <div class="recipe" data-recipe="baked-salmon-rice">
+    <div class="r-header">
+      <div class="r-title">Baked salmon with white rice & zucchini</div>
+      <div class="r-meta"><span class="badge">Serves 1–2</span><span class="badge">25 min</span></div>
+      <div class="tags"><span class="tag t-thyroid">thyroid</span><span class="tag t-anti">anti-inflam</span><span class="tag t-iron">iron</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">1 fillet</span>salmon (~150g)</div>
+        <div class="ing-item"><span class="ing-amt">1 cup</span>cooked white rice</div>
+        <div class="ing-item"><span class="ing-amt">1</span>zucchini, sliced into half-moons</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>olive oil</div>
+        <div class="ing-item"><span class="ing-amt">1 tsp</span>sesame seeds</div>
+        <div class="ing-item"><span class="ing-amt">½</span>lemon, juiced</div>
+        <div class="ing-item"><span class="ing-amt">salt</span>to taste</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Preheat oven to 400°F (200°C). Line a baking sheet with parchment.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Place salmon on sheet. Drizzle with ½ tbsp olive oil and lemon juice. Season with salt.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Toss zucchini with remaining olive oil and a pinch of salt. Arrange around the salmon.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Bake 15–18 min until salmon flakes easily and zucchini is tender.</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-text">Serve over rice. Sprinkle sesame seeds on top.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Heartburn tip</div>Baking is much gentler on your stomach than pan-frying. Avoid eating within 2–3 hours of lying down.</div>
+  </div>
+    <div class="recipe" data-recipe="beef-stirfry">
+    <div class="r-header">
+      <div class="r-title">Beef & bell pepper stir-fry over rice</div>
+      <div class="r-meta"><span class="badge">Serves 1–2</span><span class="badge">20 min</span></div>
+      <div class="tags"><span class="tag t-iron">iron</span><span class="tag t-vc">vitamin C</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">150g</span>beef cubes</div>
+        <div class="ing-item"><span class="ing-amt">1</span>red or orange bell pepper, sliced</div>
+        <div class="ing-item"><span class="ing-amt">1 cup</span>bok choy, roughly chopped</div>
+        <div class="ing-item"><span class="ing-amt">1 cup</span>cooked white rice</div>
+        <div class="ing-item"><span class="ing-amt">1 tsp</span>fresh ginger, grated</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>low-sodium soy sauce or tamari</div>
+        <div class="ing-item"><span class="ing-amt">1 tsp</span>sesame oil</div>
+        <div class="ing-item"><span class="ing-amt">½ tbsp</span>olive oil</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Cut beef into 2cm cubes. Pat dry.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Heat olive oil in a wok or wide pan over high heat until very hot.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Add beef in a single layer. Sear 1–2 min without stirring, then toss. Cook 1 min more. Remove and set aside.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">In same pan, add bell pepper and bok choy. Stir-fry 3–4 min over medium-high until cooked but slightly crisp.</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-text">Return beef to pan. Add ginger, soy sauce, and sesame oil. Toss well for 1 min.</div></div>
+        <div class="step"><div class="step-num">6</div><div class="step-text">Serve immediately over white rice.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Iron pairing</div>Bell pepper is one of the highest vitamin C vegetables — eating it alongside beef heme iron helps absorb non-heme iron from the bok choy too.</div>
+  </div>
+    <div class="recipe" data-recipe="roasted-chicken-veg">
+    <div class="r-header">
+      <div class="r-title">Chicken thigh with roasted vegetables</div>
+      <div class="r-meta"><span class="badge">Serves 1</span><span class="badge">40 min</span></div>
+      <div class="tags"><span class="tag t-iron">iron</span><span class="tag t-vc">vitamin C</span><span class="tag t-gut">gentle GI</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">1</span>boneless chicken thighs</div>
+        <div class="ing-item"><span class="ing-amt">½</span>zucchini, chunked</div>
+        <div class="ing-item"><span class="ing-amt">½</span>red bell pepper, chunked</div>
+        <div class="ing-item"><span class="ing-amt">1</span>carrot, sliced</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>olive oil</div>
+        <div class="ing-item"><span class="ing-amt">1 tsp</span>dried oregano</div>
+        <div class="ing-item"><span class="ing-amt">1 tsp</span>dried thyme</div>
+        <div class="ing-item"><span class="ing-amt">1 clove</span>garlic, minced</div>
+        <div class="ing-item"><span class="ing-amt">1 cup</span>cooked white rice per person</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Preheat oven to 425°F (220°C).</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Toss vegetables with 1 tbsp olive oil, garlic, herbs, and a pinch of salt. Spread on a baking sheet.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Rub chicken thighs with remaining olive oil and herbs. Place on top of vegetables.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Roast 30–35 min until chicken is golden and juices run clear (internal temp 165°F / 74°C).</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-text">Rest 5 min before serving over rice.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Batch tip</div>Double the recipe — leftover roasted chicken and veg keep well in the fridge for 3 days and reheat perfectly over fresh rice for a quick lunch.</div>
+  </div>
+    <div class="recipe" data-recipe="chicken-lentil-stew-di">
+    <div class="r-header">
+      <div class="r-title">Chicken & lentil stew <span class="swap-badge">was turkey</span></div>
+      <div class="r-meta"><span class="badge">Serves 1</span><span class="badge">40 min</span></div>
+      <div class="tags"><span class="tag t-iron">iron</span><span class="tag t-anti">anti-inflam</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">100g</span>boneless chicken thighs, diced</div>
+        <div class="ing-item"><span class="ing-amt">⅓ cup</span>green lentils, rinsed</div>
+        <div class="ing-item"><span class="ing-amt">1 handful</span>fresh spinach</div>
+        <div class="ing-item"><span class="ing-amt">1 clove</span>garlic, minced</div>
+        <div class="ing-item"><span class="ing-amt">¼ tsp</span>ground cumin</div>
+        <div class="ing-item"><span class="ing-amt">pinch</span>turmeric</div>
+        <div class="ing-item"><span class="ing-amt">1½ cups</span>low-sodium chicken broth</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>olive oil</div>
+        <div class="ing-item"><span class="ing-amt">¼</span>lemon, juiced</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Heat olive oil in a pot. Brown chicken pieces 3–4 min. Remove and set aside.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">In same pot, cook garlic 1 min. Add cumin and turmeric, stir 30 sec.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Add lentils and broth. Bring to a boil, reduce to a simmer, cook 20 min.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Return chicken to pot. Simmer 10 more min until lentils are fully tender.</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-text">Stir in spinach and lemon juice. Cook 1–2 min until spinach wilts. Serve over rice.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Double iron hit</div>Chicken thigh + green lentils + spinach in one bowl is one of the highest-iron meals in your plan. The lemon at the end ties it all together for absorption.</div>
+  </div>
+    <div class="recipe" data-recipe="salmon-lentils">
+    <div class="r-header">
+      <div class="r-title">Baked salmon with lentils & steamed spinach</div>
+      <div class="r-meta"><span class="badge">Serves 1–2</span><span class="badge">30 min</span></div>
+      <div class="tags"><span class="tag t-iron">iron</span><span class="tag t-thyroid">thyroid</span><span class="tag t-anti">anti-inflam</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">1 fillet</span>salmon (~150g)</div>
+        <div class="ing-item"><span class="ing-amt">½ cup</span>green lentils (dry), cooked</div>
+        <div class="ing-item"><span class="ing-amt">2 handfuls</span>baby spinach, steamed</div>
+        <div class="ing-item"><span class="ing-amt">2 cloves</span>garlic, minced</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>olive oil</div>
+        <div class="ing-item"><span class="ing-amt">½</span>lemon, juiced</div>
+        <div class="ing-item"><span class="ing-amt">salt & pepper</span>to taste</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Cook lentils per package directions (about 20–25 min). Drain and toss with olive oil, garlic, and lemon juice.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Preheat oven to 400°F (200°C). Place salmon on lined baking sheet. Season with salt, pepper, and lemon.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Bake 15–18 min until salmon flakes easily.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Steam spinach 2–3 min until wilted.</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-text">Plate lentils, add spinach alongside, place salmon on top.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Highest iron dinner</div>This meal combines heme iron (salmon), non-heme iron (lentils + spinach), and vitamin C (lemon) in one plate — the most comprehensive iron absorption setup in the plan.</div>
+  </div>
+    <div class="recipe" data-recipe="chicken-rice-bowl-fri">
+    <div class="r-header">
+      <div class="r-title">Chicken rice bowl with avocado & cucumber <span class="swap-badge">was turkey</span></div>
+      <div class="r-meta"><span class="badge">Serves 1–2</span><span class="badge">20 min</span></div>
+      <div class="tags"><span class="tag t-iron">iron</span><span class="tag t-anti">anti-inflam</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">150g</span>boneless chicken thighs, thinly sliced</div>
+        <div class="ing-item"><span class="ing-amt">1 cup</span>cooked white rice</div>
+        <div class="ing-item"><span class="ing-amt">½</span>avocado, sliced</div>
+        <div class="ing-item"><span class="ing-amt">½</span>cucumber, sliced</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>sesame seeds</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>olive oil</div>
+        <div class="ing-item"><span class="ing-amt">½</span>lemon, juiced</div>
+        <div class="ing-item"><span class="ing-amt">1 clove</span>garlic, minced</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Season chicken slices lightly with salt. Heat olive oil in a pan over medium-high.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Add garlic, then chicken. Cook 3–4 min per side until golden and cooked through.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Place rice in bowl. Top with sliced chicken.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Arrange avocado and cucumber alongside. Sprinkle sesame seeds over.</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-text">Drizzle lemon juice over the whole bowl. Serve immediately.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Sesame seeds</div>A tablespoon of sesame seeds adds ~1.3mg iron plus calcium and zinc — small but meaningful on top of the chicken.</div>
+  </div>
+    <div class="recipe" data-recipe="beef-veg-rice">
+    <div class="r-header">
+      <div class="r-title">Beef & vegetable rice bowl</div>
+      <div class="r-meta"><span class="badge">Serves 1–2</span><span class="badge">20 min</span></div>
+      <div class="tags"><span class="tag t-iron">iron</span><span class="tag t-vc">vitamin C</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">150g</span>beef cubes</div>
+        <div class="ing-item"><span class="ing-amt">1</span>bell pepper, chunked & cooked</div>
+        <div class="ing-item"><span class="ing-amt">1</span>zucchini, diced & cooked</div>
+        <div class="ing-item"><span class="ing-amt">1 cup</span>cooked white rice</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>olive oil</div>
+        <div class="ing-item"><span class="ing-amt">2 cloves</span>garlic, minced</div>
+        <div class="ing-item"><span class="ing-amt">fresh parsley</span>to garnish</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Season beef cubes with salt and a little pepper.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Heat olive oil in a pan over high heat. Sear beef 2–3 min. Remove and rest.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">In same pan, cook garlic, bell pepper, and zucchini 4–5 min over medium heat.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Place rice in bowl. Top with beef and vegetables. Garnish with fresh parsley.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Sunday simplicity</div>This is a great fridge-clearing Sunday dinner using whatever vegetables are left from the week. Bell pepper provides vitamin C to pair with the beef iron.</div>
+  </div>
+  </div>
+  <div id="sub-sn" class="sub-panel">
+    <div class="cl"><div class="cldot" style="background:#639922"></div>Vegetarian</div>
+    <div class="recipe" data-recipe="ginger-tea">
+    <div class="r-header">
+      <div class="r-title">Ginger chamomile tea blend</div>
+      <div class="r-meta"><span class="badge">Serves 1</span><span class="badge">5 min</span></div>
+      <div class="tags"><span class="tag t-gut">gentle GI</span><span class="tag t-anti">anti-inflam</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">1 bag</span>chamomile tea</div>
+        <div class="ing-item"><span class="ing-amt">3–4 slices</span>fresh ginger root</div>
+        <div class="ing-item"><span class="ing-amt">1½ cups</span>hot (not boiling) water</div>
+        <div class="ing-item"><span class="ing-amt">½ tsp</span>raw honey (optional)</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Slice fresh ginger into thin rounds. Place in a mug.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Add chamomile tea bag. Pour hot (not boiling) water over — about 185°F / 85°C.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Steep 5–7 min. Remove bag. Leave ginger in.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Add honey if desired. Sip slowly.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">When to drink this</div>Best 30 min after meals or in the evening. Avoid drinking tea within 1 hour of iron-rich meals — tannins can reduce iron absorption.</div>
+  </div>
+    <div class="recipe" data-recipe="seed-apricot-mix">
+    <div class="r-header">
+      <div class="r-title">Pumpkin seed & dried apricot snack mix</div>
+      <div class="r-meta"><span class="badge">Serves 1</span><span class="badge">2 min</span></div>
+      <div class="tags"><span class="tag t-iron">iron</span><span class="tag t-gut">gentle GI</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">2 tbsp</span>raw pumpkin seeds</div>
+        <div class="ing-item"><span class="ing-amt">4–5</span>unsulfured dried apricots</div>
+        <div class="ing-item"><span class="ing-amt">optional</span>small piece of fruit with vitamin C</div>
+      </div>
+      <div>
+        <div class="r-section-title">Notes</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Portion into a small container in advance for grab-and-go.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Eat with a vitamin C fruit (watermelon, strawberry, papaya) to boost iron absorption from seeds and apricots.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Choose unsulfured apricots (brown, not bright orange) — sulfites can trigger headaches and GI distress.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Iron content</div>Pumpkin seeds ~2.5mg iron per oz. Dried apricots ~1.5mg per 5 pieces. Together with vitamin C pairing, this small snack contributes meaningfully to your daily iron intake.</div>
+  </div>
+  </div>
+  <div id="sub-tr" class="sub-panel">
+    <div class="cl"><div class="cldot" style="background:#639922"></div>Vegetarian</div>
+    <div class="recipe" data-recipe="nice-cream">
+    <div class="r-header">
+      <div class="r-title">Frozen banana nice cream</div>
+      <div class="r-meta"><span class="badge">Serves 1–2</span><span class="badge">5 min + freeze</span></div>
+      <div class="tags"><span class="tag t-gut">gentle GI</span><span class="tag t-iron">iron</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">2 large</span>very ripe bananas, sliced & frozen overnight</div>
+        <div class="ing-item"><span class="ing-amt">optional</span>1 tbsp almond butter</div>
+        <div class="ing-item"><span class="ing-amt">optional</span>1 tsp cacao powder (chocolate version)</div>
+        <div class="ing-item"><span class="ing-amt">optional</span>½ cup frozen strawberries (pink version)</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Freeze ripe sliced bananas in a single layer overnight.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Blend frozen banana in a food processor. Scrape sides often — it will go crumbly then creamy, takes 2–3 min.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Add any optional flavors. Blend 30 sec more.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Eat immediately (soft serve) or freeze 1 hr for scoopable texture.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Why this works for you</div>Banana is one of the most gut-soothing foods there is. The cacao powder version gives a small iron boost (~1mg per tsp) and antioxidants. No dairy, no eggs, no triggers.</div>
+  </div>
+    <div class="recipe" data-recipe="mango-popsicles">
+    <div class="r-header">
+      <div class="r-title">Mango & coconut frozen popsicles</div>
+      <div class="r-meta"><span class="badge">Makes 4–6</span><span class="badge">10 min + 4 hr freeze</span></div>
+      <div class="tags"><span class="tag t-gut">gentle GI</span><span class="tag t-vc">vitamin C</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">1 cup</span>frozen mango chunks</div>
+        <div class="ing-item"><span class="ing-amt">½ cup</span>light coconut milk (canned)</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>lime juice</div>
+        <div class="ing-item"><span class="ing-amt">1 tsp</span>honey (optional)</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Blend mango, coconut milk, lime, and honey until completely smooth.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Pour into popsicle molds or small paper cups. Insert sticks.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Freeze at least 4 hours or overnight.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Run warm water over the mold for a few seconds to release.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Vitamin C bonus</div>Mango is very high in vitamin C — having this after an iron-rich meal extends the absorption window. Light coconut milk keeps fat moderate.</div>
+  </div>
+    <div class="recipe" data-recipe="banana-cookies">
+    <div class="r-header">
+      <div class="r-title">3-ingredient banana oat cookies</div>
+      <div class="r-meta"><span class="badge">Makes ~12</span><span class="badge">20 min</span></div>
+      <div class="tags"><span class="tag t-iron">iron</span><span class="tag t-gut">gentle GI</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">2 large</span>very ripe bananas, mashed</div>
+        <div class="ing-item"><span class="ing-amt">1 cup</span>rolled oats</div>
+        <div class="ing-item"><span class="ing-amt">¼ cup</span>dark chocolate chips (dairy-free optional)</div>
+        <div class="ing-item"><span class="ing-amt">optional</span>pinch cinnamon</div>
+        <div class="ing-item"><span class="ing-amt">optional</span>1 tbsp pumpkin seeds (iron boost)</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Preheat oven to 350°F (175°C). Line a baking sheet with parchment.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Mash bananas until smooth. Stir in oats, cinnamon, and mix-ins.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Drop tablespoon-sized rounds onto the sheet. Flatten slightly.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Bake 12–14 min until golden at the edges. Cool 5 min — they firm up as they cool.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Sneak in iron</div>Add 1 tbsp pumpkin seeds to the batter. Dark chocolate chips (70%+ cacao) add a further iron bump. Make a batch on Sunday — they keep for 4–5 days.</div>
+  </div>
+    <div class="recipe" data-recipe="energy-bites">
+    <div class="r-header">
+      <div class="r-title">Almond butter & oat energy bites (no-bake)</div>
+      <div class="r-meta"><span class="badge">Makes ~14</span><span class="badge">10 min + 1 hr chill</span></div>
+      <div class="tags"><span class="tag t-iron">iron</span><span class="tag t-gut">gentle GI</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">1 cup</span>rolled oats</div>
+        <div class="ing-item"><span class="ing-amt">⅓ cup</span>almond butter</div>
+        <div class="ing-item"><span class="ing-amt">3 tbsp</span>honey or maple syrup</div>
+        <div class="ing-item"><span class="ing-amt">¼ cup</span>dark chocolate chips (70%+)</div>
+        <div class="ing-item"><span class="ing-amt">1 tbsp</span>pumpkin seeds</div>
+        <div class="ing-item"><span class="ing-amt">pinch</span>cinnamon</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Mix all ingredients in a bowl until fully combined. If too dry, add ½ tsp more honey.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Refrigerate the mixture 30 min — makes it easier to roll.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Roll into tablespoon-sized balls. Place on a lined tray.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Refrigerate at least 1 hour before eating. Store in fridge up to 1 week.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Make a batch on Sunday</div>These keep in the fridge all week. Two bites satisfies a sweet craving without spiking blood sugar. Great after dinner or as a mid-afternoon snack.</div>
+  </div>
+    <div class="recipe" data-recipe="hot-cacao">
+    <div class="r-header">
+      <div class="r-title">Hot cacao with oat milk</div>
+      <div class="r-meta"><span class="badge">Serves 1</span><span class="badge">5 min</span></div>
+      <div class="tags"><span class="tag t-iron">iron</span><span class="tag t-gut">gentle GI</span><span class="tag t-anti">anti-inflam</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">1½ tsp</span>raw cacao powder</div>
+        <div class="ing-item"><span class="ing-amt">1 cup</span>oat milk</div>
+        <div class="ing-item"><span class="ing-amt">1 tsp</span>honey or maple syrup</div>
+        <div class="ing-item"><span class="ing-amt">pinch</span>cinnamon</div>
+        <div class="ing-item"><span class="ing-amt">pinch</span>ground ginger (optional)</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Warm oat milk in a small saucepan over medium-low heat. Do not boil.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Whisk in cacao powder until fully dissolved — no lumps.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Stir in honey, cinnamon, and ginger.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Pour into a mug. Sip slowly — ideally not right before bed if heartburn is active.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Cacao vs cocoa</div>Raw cacao powder has significantly more iron and antioxidants than hot cocoa mix and no added sugar. Look for brands like Navitas or Anthony's.</div>
+  </div>
+    <div class="recipe" data-recipe="choc-apricots">
+    <div class="r-header">
+      <div class="r-title">Chocolate-dipped dried apricots</div>
+      <div class="r-meta"><span class="badge">Makes ~10 pieces</span><span class="badge">15 min + 30 min set</span></div>
+      <div class="tags"><span class="tag t-iron">iron</span><span class="tag t-gut">gentle GI</span></div>
+        <div class="rc">
+          <div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>
+          <div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>
+          <div class="days-wrap">
+            <div class="p1days">
+              <span class="days-lbl p1lbl">Days/week:</span>
+              <div class="days-ctrl">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button>
+                <span class="days-val" data-person="1">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button>
+              </div>
+            </div>
+            <div class="p2days" style="display:none">
+              <span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span>
+              <div class="days-ctrl" style="border-color:#85B7EB">
+                <button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button>
+                <span class="days-val" data-person="2">1</span>
+                <button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteRecipe(this)">&#128465; Remove recipe</button>
+        </div>
+    </div>
+    <div class="r-body">
+      <div>
+        <div class="r-section-title">Ingredients</div>
+        <div class="ing-item"><span class="ing-amt">10</span>unsulfured dried apricots</div>
+        <div class="ing-item"><span class="ing-amt">50g</span>dark chocolate (70%+), broken into pieces</div>
+      </div>
+      <div>
+        <div class="r-section-title">Steps</div>
+        <div class="step"><div class="step-num">1</div><div class="step-text">Melt dark chocolate in a small bowl in the microwave — 30 sec bursts, stir between each until smooth.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Dip each apricot halfway into melted chocolate. Shake off excess.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Place on a parchment-lined tray. Refrigerate 20–30 min until set.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Store in the fridge in a sealed container for up to 1 week.</div></div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-label">Best treat in the plan for your labs</div>Apricots + dark chocolate = two iron sources in one treat. Both also have magnesium which can help with migraines. Make a batch on the weekend and have 2–3 pieces as your evening sweet.</div>
+  </div>
+  </div>
+</div>
+<div id="main-grocery" class="main-panel">
+  <div class="excl-bar" id="excl-bar"></div>
+  <div id="shared-note" style="font-size:11px;color:#888780;margin-bottom:10px;display:none">
+    Some ingredients (like sweet potatoes, lemons, olive oil) are used across multiple recipes. 
+    An ingredient only disappears when <strong>all</strong> recipes using it are toggled off.
+  </div>
+  <div class="grocery-top">
+    <div class="prog-wrap">
+      <div class="prog-label" id="prog-label">0 of 0 items checked</div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-sm" onclick="checkAll()">Check all</button>
+      <button class="btn-sm" onclick="uncheckAll()">Uncheck all</button>
+    </div>
+  </div>
+  <div class="cat-tabs">
+    <button class="cat-tab active" onclick="showGCat('g-all',this)"><div class="cdot" style="background:#888780"></div>All</button>
+    <button class="cat-tab" onclick="showGCat('g-protein',this)"><div class="cdot" style="background:#E24B4A"></div>Proteins</button>
+    <button class="cat-tab" onclick="showGCat('g-produce',this)"><div class="cdot" style="background:#639922"></div>Produce</button>
+    <button class="cat-tab" onclick="showGCat('g-pantry',this)"><div class="cdot" style="background:#BA7517"></div>Pantry</button>
+    <button class="cat-tab" onclick="showGCat('g-dairy',this)"><div class="cdot" style="background:#378ADD"></div>Dairy</button>
+    <button class="cat-tab" onclick="showGCat('g-spices',this)"><div class="cdot" style="background:#7F77DD"></div>Spices</button>
+    <button class="cat-tab" onclick="showGCat('g-treats',this)"><div class="cdot" style="background:#D4537E"></div>Treats</button>
+  </div>
+  <div id="g-all" class="gpanel active"></div>
+  <div id="g-protein" class="gpanel"></div>
+  <div id="g-produce" class="gpanel"></div>
+  <div id="g-pantry" class="gpanel"></div>
+  <div id="g-dairy" class="gpanel"></div>
+  <div id="g-spices" class="gpanel"></div>
+  <div id="g-treats" class="gpanel"></div>
+</div>
+<div id="main-prep" class="main-panel">
+  <div id="prep-content"></div>
+</div>
+<div id="main-ai" class="main-panel">
+  <div class="ai-header">
+    <h2>Find a recipe</h2>
+    <p>Describe what you want — ingredients, meal type, dietary needs — and get a personalised suggestion that fits your health plan.</p>
+  </div>
+
+  <div class="ai-chips" id="ai-chips">
+    <button class="ai-chip" onclick="useChip(this)">High-iron dinner</button>
+    <button class="ai-chip" onclick="useChip(this)">Gentle on stomach</button>
+    <button class="ai-chip" onclick="useChip(this)">Quick breakfast under 10 min</button>
+    <button class="ai-chip" onclick="useChip(this)">Salmon recipe</button>
+    <button class="ai-chip" onclick="useChip(this)">Something with lentils</button>
+    <button class="ai-chip" onclick="useChip(this)">Anti-inflammatory lunch</button>
+    <button class="ai-chip" onclick="useChip(this)">Egg-free sweet treat</button>
+    <button class="ai-chip" onclick="useChip(this)">Thyroid-supportive meal</button>
+  </div>
+
+  <div class="ai-input-row">
+    <input class="ai-input" id="ai-input" type="text"
+      placeholder="e.g. a high-iron lunch that uses chicken..."
+      onkeydown="if(event.key==='Enter')sendAI()"
+    >
+    <button class="ai-send-btn" id="ai-send-btn" onclick="sendAI()">Ask</button>
+  </div>
+
+  <div class="ai-history" id="ai-history"></div>
+</div>
+
+
+<script>
+
+var excl = {};
+var serv = {};
+var chkd = {};
+var days = {};  // rid -> Person 1 days per week (default 1)
+var days2 = {}; // rid -> Person 2 days per week (default 1, only when x2)
+
+var ITEMS = [
+  {id:"gi-salmon",name:"Salmon fillets",q1:"~1 lb / 4 fillets",q2:"~2 lbs / 8 fillets",recipes:["baked-salmon-rice", "salmon-mash", "salmon-lentils"],tags:["di", "lu"],cat:"protein",unit:"salmon fillet",units:"salmon fillets",rqty:{"baked-salmon-rice": [1, 2], "salmon-mash": [1, 2], "salmon-lentils": [1, 2]}},
+  {id:"gi-chkthigh",name:"Boneless chicken thighs",q1:"~2 lbs",q2:"~3.5 lbs",recipes:["chicken-bean-stew", "roasted-chicken-veg", "chicken-lentil-stew-di", "chicken-rice-bowl-fri", "batch-stew"],tags:["lu", "di"],cat:"protein",unit:"g chicken thighs",units:"g chicken thighs",rqty:{"chicken-bean-stew": [400, 700], "roasted-chicken-veg": [300, 600], "chicken-lentil-stew-di": [300, 600], "chicken-rice-bowl-fri": [150, 300], "batch-stew": [500, 900]}},
+  {id:"gi-grndchk",name:"Ground chicken",q1:"~1/2 lb",q2:"~1 lb",recipes:["chicken-avocado-bowl"],tags:["lu", "di"],cat:"protein",unit:"g boneless chicken thighs, diced",units:"g boneless chicken thighs, diced",rqty:{"chicken-avocado-bowl": [150, 300]}},
+  {id:"gi-beef",name:"Beef cubes",q1:"~300g / ~2/3 lb",q2:"~600g / ~1.3 lbs",recipes:["beef-stirfry", "beef-veg-rice"],tags:["di"],cat:"protein",unit:"g beef cubes",units:"g beef cubes",rqty:{"beef-stirfry": [150, 300], "beef-veg-rice": [150, 300]}},
+  {id:"gi-smkdsalm",name:"Smoked salmon",q1:"~4 oz pack",q2:"~8 oz pack",recipes:["salmon-rice-cakes"],tags:["bf"],cat:"protein",unit:"oz smoked salmon",units:"oz smoked salmon",rqty:{"salmon-rice-cakes": [4, 8]}},
+  {id:"gi-wbeans",name:"Canned white beans",q1:"2-3 cans, drained",q2:"4-5 cans, drained",recipes:["chicken-bean-stew"],tags:["lu"],cat:"protein",unit:"can white beans",units:"cans white beans",rqty:{"chicken-bean-stew": [1, 2]}},
+  {id:"gi-redlentil",name:"Red lentils (dry)",q1:"1 lb bag",q2:"2 lb bag",recipes:["lentil-soup", "batch-stew"],tags:["lu", "di"],cat:"protein",unit:"cup red lentils",units:"cups red lentils",rqty:{"lentil-soup": [1, 2], "batch-stew": [1, 2]}},
+  {id:"gi-grnlentil",name:"Green or brown lentils (dry)",q1:"1 lb bag",q2:"2 lb bag",recipes:["spinach-lentil-soup", "chicken-lentil-stew-di", "salmon-lentils"],tags:["lu", "di"],cat:"protein",unit:"cup green lentils",units:"cups green lentils",rqty:{"spinach-lentil-soup": [1, 2], "chicken-lentil-stew-di": [1, 2], "salmon-lentils": [1, 2]}},
+  {id:"gi-tofu",name:"Soft tofu",q1:"1 block",q2:"2 blocks",recipes:["miso-soup"],tags:["lu"],cat:"protein",unit:"block tofu",units:"blocks tofu",rqty:{"miso-soup": [1, 1]}},
+  {id:"gi-banana",name:"Bananas (ripe)",q1:"2 bunches, some pre-frozen",q2:"3-4 bunches, some pre-frozen",recipes:["smoothie-bowl", "rice-porridge", "oat-smoothie", "oat-pancakes", "nice-cream", "banana-cookies"],tags:["bf", "tr"],cat:"produce",unit:"banana",units:"bananas",rqty:{"smoothie-bowl": [1, 2], "rice-porridge": [1, 2], "oat-smoothie": [1, 2], "oat-pancakes": [1, 2], "nice-cream": [2, 4], "banana-cookies": [2, 4]}},
+  {id:"gi-blueberry",name:"Blueberries",q1:"1 cup / 12 oz frozen",q2:"2 cups / 24 oz frozen",recipes:["rice-porridge"],tags:["bf"],cat:"produce",unit:"cup of blueberries",units:"cups of blueberries",rqty:{"rice-porridge": [1, 2]}},
+  {id:"gi-strawberry",name:"Strawberries",q1:"1 lb fresh or frozen",q2:"2 lbs fresh or frozen",recipes:["smoothie-bowl", "salmon-rice-cakes", "oat-pancakes", "nice-cream"],tags:["bf"],cat:"produce",unit:"cup of strawberries",units:"cups of strawberries",rqty:{"smoothie-bowl": [1, 2], "salmon-rice-cakes": [1, 1], "oat-pancakes": [1, 2], "nice-cream": [1, 2]}},
+  {id:"gi-lemon",name:"Lemons",q1:"6-8 lemons",q2:"12-14 lemons",recipes:["smoothie-bowl", "salmon-rice-cakes", "lentil-soup", "chicken-bean-stew", "chicken-avocado-bowl", "salmon-mash", "spinach-lentil-soup", "batch-stew", "baked-salmon-rice", "salmon-lentils", "chicken-rice-bowl-fri"],tags:["lu", "di"],cat:"produce",unit:"lemon",units:"lemons",rqty:{"smoothie-bowl": [1, 1], "salmon-rice-cakes": [1, 1], "lentil-soup": [1, 1], "chicken-bean-stew": [1, 1], "chicken-avocado-bowl": [1, 1], "salmon-mash": [1, 1], "spinach-lentil-soup": [1, 1], "batch-stew": [1, 1], "baked-salmon-rice": [1, 1], "salmon-lentils": [1, 1], "chicken-rice-bowl-fri": [1, 1]}},
+  {id:"gi-avocado",name:"Avocados",q1:"4-5, varying ripeness",q2:"8-10, varying ripeness",recipes:["salmon-rice-cakes", "chicken-avocado-bowl", "chicken-rice-bowl-fri"],tags:["bf", "lu", "di"],cat:"produce",unit:"avocado",units:"avocados",rqty:{"salmon-rice-cakes": [1, 2], "chicken-avocado-bowl": [1, 1], "chicken-rice-bowl-fri": [1, 1]}},
+  {id:"gi-watermelon",name:"Watermelon",q1:"1 small or pre-cut",q2:"1 large or 2 pre-cut",recipes:["seed-apricot-mix"],tags:["sn"],cat:"produce",unit:"pack of watermelon",units:"packs of watermelon",rqty:{"seed-apricot-mix": [1, 1]}},
+  
+  {id:"gi-mango",name:"Mango (frozen chunks)",q1:"1 bag",q2:"2 bags",recipes:["mango-popsicles"],tags:["tr"],cat:"produce",unit:"cup frozen mango",units:"cups frozen mango",rqty:{"mango-popsicles": [1, 2]}},
+  {id:"gi-lime",name:"Lime",q1:"1-2 limes",q2:"3-4 limes",recipes:["mango-popsicles"],tags:["tr"],cat:"produce",unit:"lime",units:"limes",rqty:{"mango-popsicles": [1, 2]}},
+  {id:"gi-spinach",name:"Baby spinach",q1:"Large 5 oz+ bag",q2:"2 large bags",recipes:["oat-smoothie", "spinach-lentil-soup", "chicken-lentil-stew-di", "salmon-lentils"],tags:["bf", "lu", "di"],cat:"produce",unit:"handful of spinach",units:"handfuls of spinach",rqty:{"oat-smoothie": [1, 2], "spinach-lentil-soup": [2, 4], "chicken-lentil-stew-di": [2, 4], "salmon-lentils": [2, 4]}},
+  {id:"gi-swpotato",name:"Sweet potatoes",q1:"4-5 medium",q2:"8-10 medium",recipes:["smoothie-bowl", "lentil-soup", "salmon-mash", "batch-stew"],tags:["bf", "lu", "di"],cat:"produce",unit:"sweet potato",units:"sweet potatoes",rqty:{"smoothie-bowl": [1, 1], "lentil-soup": [1, 2], "salmon-mash": [1, 2], "batch-stew": [2, 3]}},
+  {id:"gi-zucchini",name:"Zucchini",q1:"4-5 medium",q2:"8-10 medium",recipes:["chicken-bean-stew", "baked-salmon-rice", "roasted-chicken-veg", "beef-veg-rice"],tags:["lu", "di"],cat:"produce",unit:"zucchini",units:"zucchini",rqty:{"chicken-bean-stew": [1, 2], "baked-salmon-rice": [1, 2], "roasted-chicken-veg": [1, 2], "beef-veg-rice": [1, 2]}},
+  {id:"gi-carrot",name:"Carrots",q1:"1 lb bag",q2:"2 lb bag",recipes:["chicken-bean-stew", "salmon-mash", "roasted-chicken-veg", "batch-stew"],tags:["lu", "di"],cat:"produce",unit:"carrot",units:"carrots",rqty:{"chicken-bean-stew": [2, 3], "salmon-mash": [2, 3], "roasted-chicken-veg": [2, 4], "batch-stew": [2, 3]}},
+  {id:"gi-bellpepper",name:"Red or orange bell peppers",q1:"3-4 peppers",q2:"6-8 peppers",recipes:["beef-stirfry", "roasted-chicken-veg", "beef-veg-rice"],tags:["di"],cat:"produce",unit:"bell pepper",units:"bell peppers",rqty:{"beef-stirfry": [1, 2], "roasted-chicken-veg": [1, 2], "beef-veg-rice": [1, 2]}},
+  {id:"gi-bokchoy",name:"Bok choy",q1:"1 head",q2:"2 heads",recipes:["beef-stirfry"],tags:["di"],cat:"produce"},
+  {id:"gi-cucumber",name:"Cucumber",q1:"2-3 cucumbers",q2:"4-6 cucumbers",recipes:["chicken-avocado-bowl", "chicken-rice-bowl-fri"],tags:["lu", "di"],cat:"produce",unit:"cucumber",units:"cucumbers",rqty:{"chicken-avocado-bowl": [1, 1], "chicken-rice-bowl-fri": [1, 1]}},
+  {id:"gi-garlic",name:"Garlic",q1:"2 bulbs",q2:"3-4 bulbs",recipes:["lentil-soup", "chicken-bean-stew", "chicken-avocado-bowl", "spinach-lentil-soup", "batch-stew", "roasted-chicken-veg", "chicken-lentil-stew-di", "salmon-lentils", "chicken-rice-bowl-fri", "beef-veg-rice"],tags:["lu", "di"],cat:"produce",unit:"bulb of garlic",units:"bulbs of garlic",rqty:{"lentil-soup": [1, 1], "chicken-bean-stew": [1, 1], "chicken-avocado-bowl": [1, 1], "spinach-lentil-soup": [1, 1], "batch-stew": [1, 1], "roasted-chicken-veg": [1, 1], "chicken-lentil-stew-di": [1, 1], "salmon-lentils": [1, 1], "chicken-rice-bowl-fri": [1, 1], "beef-veg-rice": [1, 1]}},
+  {id:"gi-ginger",name:"Fresh ginger root",q1:"1 large knob",q2:"2 large knobs",recipes:["smoothie-bowl", "oat-smoothie", "beef-stirfry", "ginger-tea"],tags:["bf", "di", "sn"],cat:"produce",unit:"knob of ginger",units:"knobs of ginger",rqty:{"smoothie-bowl": [1, 1], "oat-smoothie": [1, 1], "beef-stirfry": [1, 1], "ginger-tea": [1, 1]}},
+  {id:"gi-scallion",name:"Scallions / green onions",q1:"1 bunch",q2:"2 bunches",recipes:["miso-soup"],tags:["lu"],cat:"produce",unit:"bunch scallions",units:"bunches scallions",rqty:{"miso-soup": [1, 1]}},
+  {id:"gi-parsley",name:"Fresh parsley",q1:"1 bunch",q2:"2 bunches",recipes:["salmon-mash", "batch-stew", "beef-veg-rice"],tags:["di"],cat:"produce",unit:"bunch parsley",units:"bunches parsley",rqty:{"salmon-mash": [1, 1], "batch-stew": [1, 1], "beef-veg-rice": [1, 1]}},
+  {id:"gi-oats",name:"Rolled oats",q1:"Large canister",q2:"2 large canisters",recipes:["oat-smoothie", "oat-pancakes", "banana-cookies", "energy-bites"],tags:["bf", "tr"],cat:"pantry",unit:"cup rolled oats",units:"cups rolled oats",rqty:{"oat-smoothie": [1, 2], "oat-pancakes": [1, 2], "banana-cookies": [1, 2], "energy-bites": [1, 2]}},
+  {id:"gi-whiterice",name:"White rice",q1:"3 lb bag",q2:"5 lb bag",recipes:["rice-porridge", "miso-soup", "chicken-avocado-bowl", "baked-salmon-rice", "beef-stirfry", "roasted-chicken-veg", "chicken-lentil-stew-di", "chicken-rice-bowl-fri", "beef-veg-rice"],tags:["bf", "lu", "di"],cat:"pantry"},
+  {id:"gi-ricecakes",name:"Plain rice cakes (unsalted)",q1:"1-2 bags",q2:"3-4 bags",recipes:["salmon-rice-cakes", "seed-apricot-mix"],tags:["bf", "sn"],cat:"pantry",unit:"rice cake",units:"rice cakes",rqty:{"salmon-rice-cakes": [2, 4], "seed-apricot-mix": [2, 2]}},
+  {id:"gi-almondbut",name:"Almond butter",q1:"1 jar",q2:"2 jars",recipes:["rice-porridge", "oat-smoothie", "nice-cream", "energy-bites"],tags:["bf", "tr"],cat:"pantry"},
+  {id:"gi-pumpseed",name:"Pumpkin seeds (raw, unsalted)",q1:"1 bag",q2:"2 bags",recipes:["smoothie-bowl", "rice-porridge", "oat-smoothie", "seed-apricot-mix", "banana-cookies", "energy-bites"],tags:["bf", "sn", "tr"],cat:"pantry"},
+  {id:"gi-sesaseed",name:"Sesame seeds",q1:"Small bag",q2:"Medium bag",recipes:["baked-salmon-rice", "chicken-rice-bowl-fri"],tags:["di"],cat:"pantry"},
+  {id:"gi-apricots",name:"Dried apricots (unsulfured)",q1:"1 bag",q2:"2 bags",recipes:["seed-apricot-mix", "choc-apricots"],tags:["sn", "tr"],cat:"pantry",unit:"bag dried apricots",units:"bags dried apricots",rqty:{"seed-apricot-mix": [1, 1], "choc-apricots": [1, 1]}},
+  {id:"gi-oliveoil",name:"Olive oil (extra virgin)",q1:"1 bottle",q2:"2 bottles",recipes:["lentil-soup", "chicken-bean-stew", "chicken-avocado-bowl", "salmon-mash", "spinach-lentil-soup", "batch-stew", "oat-pancakes", "baked-salmon-rice", "beef-stirfry", "roasted-chicken-veg", "chicken-lentil-stew-di", "salmon-lentils", "chicken-rice-bowl-fri", "beef-veg-rice"],tags:["lu", "di"],cat:"pantry"},
+  {id:"gi-sesaoil",name:"Sesame oil",q1:"Small bottle",q2:"Medium bottle",recipes:["beef-stirfry"],tags:["di"],cat:"pantry"},
+  {id:"gi-soysauce",name:"Low-sodium soy sauce or tamari",q1:"1 bottle",q2:"1 bottle",recipes:["beef-stirfry"],tags:["di"],cat:"pantry"},
+  {id:"gi-chkbroth",name:"Low-sodium chicken broth",q1:"4-6 cartons (32 oz)",q2:"8-10 cartons (32 oz)",recipes:["chicken-bean-stew", "batch-stew", "chicken-lentil-stew-di"],tags:["lu", "di"],cat:"pantry",unit:"carton chicken broth (32oz)",units:"cartons chicken broth (32oz)",rqty:{"chicken-bean-stew": [1, 2], "batch-stew": [2, 3], "chicken-lentil-stew-di": [1, 2]}},
+  {id:"gi-vegbroth",name:"Low-sodium vegetable broth",q1:"2 cartons",q2:"4 cartons",recipes:["lentil-soup", "spinach-lentil-soup"],tags:["lu"],cat:"pantry",unit:"carton vegetable broth (32oz)",units:"cartons vegetable broth (32oz)",rqty:{"lentil-soup": [1, 2], "spinach-lentil-soup": [1, 2]}},
+  {id:"gi-misopaste",name:"Low-sodium miso paste",q1:"Small tub",q2:"Medium tub",recipes:["miso-soup"],tags:["lu"],cat:"pantry"},
+  {id:"gi-cocmilk",name:"Light coconut milk (canned)",q1:"1 can",q2:"2 cans",recipes:["mango-popsicles"],tags:["tr"],cat:"pantry",unit:"can coconut milk",units:"cans coconut milk",rqty:{"mango-popsicles": [1, 1]}},
+  {id:"gi-honey",name:"Honey or maple syrup",q1:"1 small bottle each",q2:"1 large bottle each",recipes:["oat-pancakes", "ginger-tea", "mango-popsicles", "hot-cacao", "energy-bites"],tags:["bf", "tr"],cat:"pantry"},
+  {id:"gi-oatmilk",name:"Oat milk (unsweetened)",q1:"3-4 cartons",q2:"6-8 cartons",recipes:["smoothie-bowl", "rice-porridge", "oat-smoothie", "oat-pancakes", "hot-cacao"],tags:["bf", "tr"],cat:"dairy"},
+  
+  
+  {id:"gi-turmeric",name:"Ground turmeric",q1:"1 jar",q2:"1 jar",recipes:["lentil-soup", "spinach-lentil-soup", "batch-stew", "chicken-lentil-stew-di"],tags:[],cat:"spices"},
+  {id:"gi-cumin",name:"Ground cumin",q1:"1 jar",q2:"1 jar",recipes:["lentil-soup", "spinach-lentil-soup", "batch-stew", "chicken-lentil-stew-di"],tags:[],cat:"spices"},
+  {id:"gi-cinnamon",name:"Ground cinnamon",q1:"1 jar",q2:"1 jar",recipes:["smoothie-bowl", "rice-porridge", "oat-pancakes", "banana-cookies", "energy-bites", "hot-cacao"],tags:[],cat:"spices"},
+  {id:"gi-gingerdry",name:"Ground ginger (dried)",q1:"1 jar",q2:"1 jar",recipes:["rice-porridge", "hot-cacao"],tags:[],cat:"spices"},
+  {id:"gi-thyme",name:"Dried thyme",q1:"1 jar",q2:"1 jar",recipes:["chicken-bean-stew", "roasted-chicken-veg"],tags:[],cat:"spices"},
+  {id:"gi-oregano",name:"Dried oregano",q1:"1 jar",q2:"1 jar",recipes:["chicken-bean-stew", "roasted-chicken-veg"],tags:[],cat:"spices"},
+  {id:"gi-chamtea",name:"Chamomile tea bags",q1:"1 box",q2:"1 box",recipes:["ginger-tea"],tags:["sn"],cat:"spices"},
+  {id:"gi-gingertea",name:"Ginger tea bags",q1:"1 box",q2:"1 box",recipes:["ginger-tea"],tags:["sn"],cat:"spices"},
+  {id:"gi-salt",name:"Sea salt / lite salt",q1:"1 container",q2:"1 container",recipes:["lentil-soup", "spinach-lentil-soup", "miso-soup", "chicken-bean-stew", "chicken-avocado-bowl", "salmon-mash", "batch-stew", "baked-salmon-rice", "beef-stirfry", "roasted-chicken-veg", "chicken-lentil-stew-di", "salmon-lentils", "chicken-rice-bowl-fri", "beef-veg-rice", "oat-pancakes", "salmon-rice-cakes"],tags:[],cat:"spices"},
+  {id:"gi-pepper",name:"Black pepper",q1:"1 grinder or jar",q2:"1 grinder or jar",recipes:["salmon-rice-cakes", "salmon-mash", "baked-salmon-rice", "beef-stirfry", "beef-veg-rice", "chicken-rice-bowl-fri"],tags:[],cat:"spices"},
+  {id:"gi-dkchocbar",name:"Dark chocolate bar (70%+)",q1:"2 bars",q2:"3-4 bars",recipes:["choc-apricots"],tags:["tr"],cat:"treats",unit:"bar dark chocolate (70%+)",units:"bars dark chocolate (70%+)",rqty:{"choc-apricots": [1, 2]}},
+  {id:"gi-dkchocchip",name:"Dark chocolate chips (70%+)",q1:"1 bag",q2:"2 bags",recipes:["banana-cookies", "energy-bites"],tags:["tr"],cat:"treats",unit:"cup dark chocolate chips",units:"cups dark chocolate chips",rqty:{"banana-cookies": [1, 1], "energy-bites": [1, 1]}},
+  {id:"gi-cacaopwd",name:"Raw cacao powder",q1:"Small bag",q2:"Medium bag",recipes:["nice-cream", "hot-cacao"],tags:["tr"],cat:"treats",unit:"bag cacao powder",units:"bags cacao powder",rqty:{"nice-cream": [1, 1], "hot-cacao": [1, 1]}},
+];
+
+var PREP = [
+  {
+    id:"rice",
+    slot:"morning",
+    time:"20 min",
+    title:"Cook a big batch of white rice",
+    desc:"Rice is used in almost every lunch and dinner. Cook once on Sunday and reheat all week.",
+    recipes:["rice-porridge", "miso-soup", "chicken-avocado-bowl", "baked-salmon-rice", "beef-stirfry", "roasted-chicken-veg", "chicken-lentil-stew-di", "chicken-rice-bowl-fri", "beef-veg-rice"],
+    steps1:["Rinse 2-3 cups white rice until water runs clear.", "Add to pot with double the water. Bring to a boil.", "Reduce to lowest heat, cover, cook 18 min. Do not lift the lid.", "Remove from heat. Steam 5 min then fluff with a fork.", "Cool completely. Store in a sealed container in the fridge up to 5 days."],
+    steps2:["Rinse 4-5 cups white rice until water runs clear.", "Add to pot with double the water. Bring to a boil.", "Reduce to lowest heat, cover, cook 18 min. Do not lift the lid.", "Remove from heat. Steam 5 min then fluff with a fork.", "Spread on a baking sheet to cool quickly. Store in two sealed containers up to 5 days."],
+    tip:"Spread rice on a baking sheet to cool quickly before refrigerating to prevent mushiness."
+  },
+  {
+    id:"stew",
+    slot:"morning",
+    time:"45 min",
+    title:"Make the Sunday chicken and lentil stew",
+    desc:"Your most important Sunday cook. Covers Mon-Tue lunches and freezes in portions for next week.",
+    recipes:["batch-stew"],
+    steps1:["Dice 500g chicken thighs into bite-size chunks.", "Brown chicken in oil 4-5 min. Remove and set aside.", "Cook garlic, turmeric, and cumin 1 min in same pot.", "Add carrots, sweet potato, red lentils, and 5 cups broth. Return chicken.", "Simmer covered 25-30 min until lentils dissolve.", "Stir in lemon juice and parsley. Season. Portion into 2-cup containers."],
+    steps2:["Dice 900g chicken thighs into bite-size chunks.", "Brown chicken in batches in oil 4-5 min. Remove and set aside.", "Cook garlic, turmeric, and cumin 1 min in same pot.", "Add carrots, sweet potato, red lentils, and 8 cups broth. Return chicken.", "Simmer covered 30 min until lentils dissolve.", "Stir in lemon juice and parsley. Portion into 8-10 two-cup containers."],
+    tip:"Double the batch if you have a big enough pot. Freezer portions save a full cooking day next week."
+  },
+  {
+    id:"lentilsoup",
+    slot:"morning",
+    time:"30 min",
+    title:"Make a pot of lentil soup",
+    desc:"Red lentil and sweet potato or spinach lentil soup. Makes 3-4 servings for the week.",
+    recipes:["lentil-soup", "spinach-lentil-soup"],
+    steps1:["Rinse 1 cup lentils. Prep sweet potato or spinach depending on your soup.", "Cook garlic and spices in olive oil 1-2 min.", "Add lentils, vegetables, and broth. Simmer 20-25 min.", "Blend partially if desired. Add lemon juice at the end.", "Cool and refrigerate. Keeps 4 days."],
+    steps2:["Rinse 1.5 cups lentils. Double the sweet potato or spinach.", "Cook garlic and spices in olive oil 1-2 min.", "Add lentils, vegetables, and 6 cups broth. Simmer 25 min.", "Blend partially if desired. Add lemon juice at the end.", "Cool and refrigerate in two containers. Keeps 4 days."],
+    tip:"Lentil soups taste better the next day once the spices meld. Great for Mon and Wed lunches straight from the fridge."
+  },
+  {
+    id:"popsicles",
+    slot:"morning",
+    time:"10 min + freeze",
+    title:"Make mango coconut popsicles",
+    desc:"Blend and freeze first thing Sunday morning and they will be ready by the afternoon.",
+    recipes:["mango-popsicles"],
+    steps1:["Blend 1 cup frozen mango, half cup coconut milk, 1 tbsp lime juice, 1 tsp honey until smooth.", "Pour into popsicle molds or paper cups with sticks.", "Freeze at least 4 hours. Run warm water on mold to release."],
+    steps2:["Blend 2 cups frozen mango, 1 cup coconut milk, 2 tbsp lime juice, 2 tsp honey until smooth.", "Pour into popsicle molds or paper cups with sticks.", "Freeze at least 4 hours. Run warm water on mold to release."],
+    tip:"Start these first thing in the morning so they are ready before dinner."
+  },
+  {
+    id:"bananas",
+    slot:"quick",
+    time:"5 min",
+    title:"Slice and freeze ripe bananas",
+    desc:"Needed for smoothie bowls, smoothies, and nice cream. 5 minutes now saves every morning.",
+    recipes:["smoothie-bowl", "oat-smoothie", "nice-cream", "banana-cookies"],
+    steps1:["Peel 4-5 very ripe bananas. Slice into 1-inch rounds.", "Spread flat on a parchment-lined tray.", "Freeze 2 hours until solid, then transfer to a zip-lock bag."],
+    steps2:["Peel 8-10 very ripe bananas. Slice into 1-inch rounds.", "Spread flat on two parchment-lined trays.", "Freeze 2 hours until solid, then transfer to zip-lock bags."],
+    tip:"Never freeze bananas in a bunch. Spread flat first, then bag once frozen."
+  },
+  {
+    id:"veg",
+    slot:"quick",
+    time:"20 min",
+    title:"Chop and portion vegetables",
+    desc:"Prepping vegetables on Sunday cuts 10+ minutes off every weeknight dinner.",
+    recipes:["chicken-bean-stew", "roasted-chicken-veg", "beef-stirfry", "beef-veg-rice", "chicken-lentil-stew-di", "baked-salmon-rice"],
+    steps1:["Peel and slice carrots into rounds. Store sealed.", "Dice zucchini into chunks. Store sealed.", "Slice bell peppers into strips. Store sealed.", "Mince a full bulb of garlic and store in a small jar. Keeps 1 week.", "Slice cucumber and store in cold water to stay crisp."],
+    steps2:["Peel and slice 2 lb carrots into rounds. Store in two containers.", "Dice 8-10 zucchini into chunks. Store in two containers.", "Slice 6-8 bell peppers into strips. Store in two containers.", "Mince 2 bulbs of garlic and store in a jar. Keeps 1 week.", "Slice cucumbers and store in cold water."],
+    tip:"Label each container with the day you will use it so you grab the right veg without thinking."
+  },
+  {
+    id:"swpotato",
+    slot:"quick",
+    time:"15 min",
+    title:"Roast or boil sweet potatoes",
+    desc:"Sweet potato appears in smoothie bowls, mash, and soups. Cook once for multiple meals.",
+    recipes:["smoothie-bowl", "salmon-mash", "lentil-soup", "batch-stew"],
+    steps1:["Peel and cube 3-4 sweet potatoes.", "Boil in salted water 12-15 min until fork-tender. Drain and cool.", "OR roast with olive oil at 400F for 25 min until caramelised.", "Store in a sealed container up to 5 days."],
+    steps2:["Peel and cube 6-8 sweet potatoes.", "Boil in salted water 12-15 min until fork-tender. Drain and cool.", "OR roast with olive oil at 400F for 30 min until caramelised.", "Store in two sealed containers up to 5 days."],
+    tip:"Boiled sweet potato works better for smoothie bowls and mash. Roasted is great as a side on its own."
+  },
+  {
+    id:"energybites",
+    slot:"afternoon",
+    time:"10 min + chill",
+    title:"Make almond butter energy bites",
+    desc:"No-bake, no oven needed. Mix, roll, refrigerate and grab all week as a sweet snack.",
+    recipes:["energy-bites"],
+    steps1:["Mix 1 cup oats, 1/3 cup almond butter, 3 tbsp honey, 1/4 cup dark choc chips, 1 tbsp pumpkin seeds, pinch cinnamon.", "Stir until combined. Refrigerate 30 min.", "Roll into 14 tablespoon-sized balls. Chill 1 hour until firm. Store in fridge up to 1 week."],
+    steps2:["Mix 2 cups oats, 2/3 cup almond butter, 6 tbsp honey, 1/2 cup dark choc chips, 2 tbsp pumpkin seeds, pinch cinnamon.", "Stir until combined. Refrigerate 30 min.", "Roll into 28 tablespoon-sized balls. Chill 1 hour until firm. Store in fridge up to 1 week."],
+    tip:"Make these while the stew is simmering. They take less than 10 minutes of active time."
+  },
+  {
+    id:"cookies",
+    slot:"afternoon",
+    time:"20 min",
+    title:"Bake banana oat cookies",
+    desc:"Egg-free, butter-free, 3 ingredients. Bake a batch and keep in the fridge all week.",
+    recipes:["banana-cookies"],
+    steps1:["Preheat oven to 350F. Line a baking sheet.", "Mash 2 very ripe bananas. Stir in 1 cup oats, choc chips, pumpkin seeds, cinnamon.", "Drop tablespoon-sized rounds. Flatten slightly.", "Bake 12-14 min until golden. Cool 5 min before eating.", "Store in fridge up to 5 days."],
+    steps2:["Preheat oven to 350F. Line two baking sheets.", "Mash 4 very ripe bananas. Stir in 2 cups oats, choc chips, pumpkin seeds, cinnamon.", "Drop tablespoon-sized rounds. Flatten slightly.", "Bake 12-14 min until golden. Cool 5 min before eating.", "Store in fridge up to 5 days."],
+    tip:"The riper the banana, the sweeter the cookie and the better it holds together."
+  },
+  {
+    id:"chocdip",
+    slot:"afternoon",
+    time:"15 min + set",
+    title:"Make chocolate-dipped apricots",
+    desc:"Best treat for your iron levels. Melt, dip, refrigerate and it keeps all week.",
+    recipes:["choc-apricots"],
+    steps1:["Melt 50g dark chocolate (70%+) in the microwave in 30 sec bursts. Stir until smooth.", "Dip 10 unsulfured apricots halfway. Shake off excess.", "Place on parchment. Refrigerate 20-30 min until set. Store in fridge up to 1 week."],
+    steps2:["Melt 100g dark chocolate (70%+) in the microwave in 30 sec bursts. Stir until smooth.", "Dip 20 unsulfured apricots halfway. Shake off excess.", "Place on parchment. Refrigerate 20-30 min until set. Store in fridge up to 1 week."],
+    tip:"Make these last so the chocolate can set while you clean up."
+  },
+];
+
+var RECIPE_QTY = {
+  "smoothie-bowl": ["1 cup sweet potato", "2 bananas", "1 cup oat milk", "2 tbsp pumpkin seeds", "1 cup strawberries"],
+  "rice-porridge": ["1 cup white rice", "2 cups oat milk", "2 bananas", "2 tbsp almond butter"],
+  "salmon-rice-cakes": ["4 rice cakes", "1 avocado", "100g smoked salmon"],
+  "oat-smoothie": ["2 bananas", "2 cups oat milk", "2 tbsp almond butter", "2 handfuls spinach"],
+  "oat-pancakes": ["2 cups rolled oats", "1.5 cups oat milk", "2 bananas"],
+  "lentil-soup": ["1.5 cups red lentils", "2 sweet potatoes", "6 cups broth (serves 6-8)"],
+  "chicken-bean-stew": ["700g chicken thighs", "2 cans white beans", "5 cups broth (serves 6-8)"],
+  "chicken-avocado-bowl": ["300g boneless chicken thighs, diced", "2 cups rice", "1 avocado"],
+  "salmon-mash": ["2 salmon fillets (300g)", "2 large sweet potatoes"],
+  "spinach-lentil-soup": ["1.5 cups lentils", "4 handfuls spinach", "6 cups broth (serves 6-8)"],
+  "miso-soup": ["2 tbsp miso paste", "3 cups water", "1 block tofu", "2 cups rice"],
+  "batch-stew": ["900g chicken thighs", "2 cups red lentils", "8 cups broth (serves 8-10)"],
+  "baked-salmon-rice": ["2 salmon fillets (300g)", "2 cups rice", "2 zucchini"],
+  "beef-stirfry": ["300g beef cubes", "2 bell peppers", "2 cups rice"],
+  "roasted-chicken-veg": ["4 chicken thighs", "2 zucchini", "2 bell peppers", "4 carrots"],
+  "chicken-lentil-stew-di": ["600g chicken thighs", "2 cups green lentils", "7 cups broth"],
+  "salmon-lentils": ["2 salmon fillets", "1 cup green lentils (dry)", "4 handfuls spinach"],
+  "chicken-rice-bowl-fri": ["300g chicken thigh", "2 cups rice", "1 avocado"],
+  "beef-veg-rice": ["300g beef cubes", "2 bell peppers", "2 zucchini", "2 cups rice"],
+  "nice-cream": ["4 large bananas"],
+  "mango-popsicles": ["2 cups mango", "1 cup coconut milk (makes 8-12 pops)"],
+  "banana-cookies": ["4 bananas", "2 cups rolled oats (makes ~24)"],
+  "energy-bites": ["2 cups oats", "2/3 cup almond butter (makes ~28)"],
+  "hot-cacao": ["1 tbsp cacao powder", "2 cups oat milk"],
+  "choc-apricots": ["20 dried apricots", "100g dark chocolate"],
+};
+
+var CAT_META = {
+  protein: {label:'Proteins',color:'#E24B4A'},
+  produce:  {label:'Produce',color:'#639922'},
+  pantry:   {label:'Pantry and oils',color:'#BA7517'},
+  dairy:    {label:'Dairy and refrigerated',color:'#378ADD'},
+  spices:   {label:'Spices, herbs and teas',color:'#7F77DD'},
+  treats:   {label:'Treats',color:'#D4537E'}
+};
+var CAT_ORDER = ['protein','produce','pantry','dairy','spices','treats'];
+var CAT_IDS = {
+  'g-protein':['gi-salmon','gi-chkthigh','gi-grndchk','gi-beef','gi-smkdsalm','gi-wbeans','gi-redlentil','gi-grnlentil','gi-tofu'],
+  'g-produce': ['gi-banana','gi-blueberry','gi-strawberry','gi-lemon','gi-avocado','gi-watermelon','gi-mango','gi-lime','gi-spinach','gi-swpotato','gi-zucchini','gi-carrot','gi-bellpepper','gi-bokchoy','gi-cucumber','gi-garlic','gi-ginger','gi-scallion','gi-parsley'],
+  'g-pantry':  ['gi-oats','gi-whiterice','gi-ricecakes','gi-almondbut','gi-pumpseed','gi-sesaseed','gi-apricots','gi-oliveoil','gi-sesaoil','gi-soysauce','gi-chkbroth','gi-vegbroth','gi-misopaste','gi-cocmilk','gi-honey'],
+  'g-dairy':   ['gi-oatmilk','gi-yogurt'],
+  'g-spices':  ['gi-turmeric','gi-cumin','gi-cinnamon','gi-gingerdry','gi-thyme','gi-oregano','gi-chamtea','gi-gingertea','gi-salt','gi-pepper'],
+  'g-treats':  ['gi-dkchocbar','gi-dkchocchip','gi-cacaopwd']
+};
+var TAG_HTML = {
+  bf:'<span class="mt mt-bf">breakfast</span>',
+  lu:'<span class="mt mt-lu">lunch</span>',
+  di:'<span class="mt mt-di">dinner</span>',
+  sn:'<span class="mt mt-sn">snack</span>',
+  tr:'<span class="mt mt-tr">treat</span>'
+};
+var SLOT_ORDER  = ['morning','quick','afternoon'];
+var SLOT_LABELS = {morning:'Morning — start these first',quick:'Quick wins — 5-20 min',afternoon:'Afternoon — while things cook'};
+var SLOT_COLORS = {morning:'#1D9E75',quick:'#378ADD',afternoon:'#BA7517'};
+
+function isActive(rid){ return !excl[rid]; }
+function getServ(rid){ return serv[rid] || 1; }
+function getDays(rid){ return days[rid] || 1; }
+function getDays2(rid){ return days2[rid] || 1; }
+function getTotalDays(rid){ return getDays(rid) + (getServ(rid)===2 ? getDays2(rid) : 0); }
+
+function calcItemDisplay(item){
+  // Staple items (no recipe link) always show
+  if(!item.recipes.length) return {show:true, qty:item.q1};
+  var active = item.recipes.filter(isActive);
+  if(!active.length) return {show:false, qty:''};
+  // If item has per-recipe quantities, sum them
+  // Always use per-1-person amount (rqty[0]) multiplied by total person-days
+  if(item.rqty){
+    var total = 0;
+    active.forEach(function(r){
+      var rq = item.rqty[r];
+      if(rq){
+        // rq[0] = per-1-person amount; multiply by combined person-days
+        total += rq[0] * getTotalDays(r);
+      }
+    });
+    if(total>0){
+      var u = total===1 ? item.unit : item.units;
+      return {show:true, qty:total+' '+u};
+    }
+  }
+  // Fallback: show q1 always if any recipe active
+  return {show:true, qty:item.q1};
+}
+
+function tagStr(tags){
+  return tags.map(function(t){ return TAG_HTML[t]||''; }).join('');
+}
+
+function buildItemHTML(item){
+  var d = calcItemDisplay(item);
+  if(!d.show) return '';
+  var cls = chkd[item.id] ? ' chk' : '';
+  var chk = chkd[item.id] ? ' checked' : '';
+  return '<div class="gi'+cls+'" id="'+item.id+'" onclick="togItem(this)">'
+    +'<input type="checkbox"'+chk+'>'
+    +'<div class="gicontent">'
+    +'<div class="giname">'+item.name+tagStr(item.tags)+'</div>'
+    +'<div class="giqty">'+d.qty+'</div>'
+    +'</div></div>';
+}
+
+function renderPanel(pid){
+  var el = document.getElementById(pid);
+  if(!el) return;
+  var html = '';
+  if(pid==='g-all'){
+    CAT_ORDER.forEach(function(cat){
+      var items = ITEMS.filter(function(x){ return x.cat===cat; });
+      var rows = items.map(buildItemHTML).join('');
+      if(!rows) return;
+      var m = CAT_META[cat];
+      html += '<div class="sec-lbl"><div class="cdot" style="background:'+m.color+'"></div>'+m.label+'</div>';
+      html += '<div class="item-grid">'+rows+'</div>';
+    });
+  } else {
+    var ids = CAT_IDS[pid]||[];
+    var rows = ids.map(function(id){
+      var item = ITEMS.find(function(x){ return x.id===id; });
+      return item ? buildItemHTML(item) : '';
+    }).join('');
+    html = '<div class="item-grid">'+rows+'</div>';
+  }
+  el.innerHTML = html;
+}
+
+function updateGrocery(){
+  renderPanel('g-all');
+  var ap = document.querySelector('.gpanel.active');
+  if(ap && ap.id!=='g-all') renderPanel(ap.id);
+  updateProgress();
+  updateNotice();
+}
+
+function updateProgress(){
+  var all = document.querySelectorAll('#g-all .gi');
+  var ck  = document.querySelectorAll('#g-all .gi.chk');
+  var pct = all.length ? Math.round(ck.length/all.length*100) : 0;
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-label').textContent = ck.length+' of '+all.length+' items checked';
+}
+
+function updateNotice(){
+  var n = Object.keys(excl).filter(function(k){ return excl[k]; }).length;
+  var el = document.getElementById('excl-bar');
+  var note = document.getElementById('shared-note');
+  if(n>0){
+    el.textContent = n+' recipe'+(n>1?'s':'')+' excluded — ingredients only used by excluded recipes are removed.';
+    el.className = 'excl-bar show';
+    if(note) note.style.display='block';
+  } else {
+    el.textContent='';
+    el.className='excl-bar';
+    if(note) note.style.display='none';
+  }
+}
+
+function updatePrep(){
+  var active = PREP.filter(function(t){ return t.recipes.some(isActive); });
+  var el = document.getElementById('prep-content');
+  if(!active.length){
+    el.innerHTML = '<div class="prep-empty">All recipes are toggled off. Turn some on in Recipes to see your prep plan.</div>';
+    return;
+  }
+  var twoCount = active.filter(function(t){
+    return t.recipes.some(function(r){ return isActive(r)&&getServ(r)===2; });
+  }).length;
+  var multiDay = active.filter(function(t){
+    return t.recipes.some(function(r){ return isActive(r)&&getDays(r)>1; });
+  }).length;
+  var noteParts = [];
+  if(twoCount) noteParts.push(twoCount+' recipe'+(twoCount>1?'s':'')+' set to x2 servings');
+  if(multiDay) noteParts.push(multiDay+' recipe'+(multiDay>1?'s':'')+' made multiple days — scale those quantities accordingly');
+  var note = noteParts.length ? noteParts.join(' · ')+'.' : 'All recipes set to x1, 1 day per week.';
+  var p = [];
+  p.push('<div class="prep-note">'+note+'</div>');
+  p.push('<div class="prep-summary">');
+  p.push('<div class="prep-stat"><div class="prep-stat-val">'+active.length+'</div><div class="prep-stat-lbl">tasks</div></div>');
+  p.push('<div class="prep-stat"><div class="prep-stat-val">~2-3</div><div class="prep-stat-lbl">hours total</div></div>');
+  p.push('<div class="prep-stat"><div class="prep-stat-val">5-7</div><div class="prep-stat-lbl">days of easy meals</div></div>');
+  p.push('</div>');
+  SLOT_ORDER.forEach(function(slot){
+    var tasks = active.filter(function(t){ return t.slot===slot; });
+    if(!tasks.length) return;
+    p.push('<div class="prep-slot-hd"><div class="cldot" style="background:'+SLOT_COLORS[slot]+'"></div>'+SLOT_LABELS[slot]+'</div>');
+    tasks.forEach(function(t){
+      var isTwo = t.recipes.some(function(r){ return isActive(r)&&getServ(r)===2; });
+      var steps = (isTwo&&t.steps2.length) ? t.steps2 : t.steps1;
+      var tid = t.id;
+      p.push('<div class="pc" id="pc-'+tid+'">');
+      p.push('<div class="pctop"><div style="flex:1">');
+      p.push('<div class="ptitle">'+t.title+'</div>');
+      p.push('<div class="pdesc">'+t.desc+'</div>');
+      // Compute total person-days for this task
+      var taskTotalDays = 0;
+      var taskP1days = 0; var taskP2days = 0; var taskIsTwo = false;
+      t.recipes.forEach(function(r){
+        if(!isActive(r)) return;
+        var td = getTotalDays(r);
+        if(td > taskTotalDays){ taskTotalDays=td; taskP1days=getDays(r); taskIsTwo=getServ(r)===2; taskP2days=getDays2(r); }
+      });
+      p.push('<div class="pbadges"><span class="badge">'+t.time+'</span>');
+      if(taskIsTwo){
+        p.push('<span class="badge" style="background:#E6F1FB;color:#0C447C">Person 1: '+taskP1days+'d &middot; Person 2: '+taskP2days+'d</span>');
+      } else if(taskP1days>1){
+        p.push('<span class="badge" style="background:#FAEEDA;color:#633806">'+taskP1days+'x this week</span>');
+      }
+      if(isTwo) p.push('<span class="badge" style="background:#E1F5EE;color:#085041">x2 quantities</span>');
+      p.push('</div></div>');
+      p.push('<div class="pcbtns"><button class="show-btn" data-tid="'+tid+'" onclick="togSteps(this.dataset.tid,this)">Show steps</button></div>');
+      p.push('</div>');
+      if(taskIsTwo){
+        var totalWeekServings = taskP1days + taskP2days;
+        p.push('<div style="font-size:11px;color:#0C447C;background:#E6F1FB;border-radius:6px;padding:4px 8px;margin-top:8px">Person 1 eats this '+taskP1days+' day'+(taskP1days>1?'s':'')+', Person 2 eats this '+taskP2days+' day'+(taskP2days>1?'s':'')+'. Total: '+totalWeekServings+' servings this week.</div>');
+      } else if(taskP1days>1){
+        p.push('<div style="font-size:11px;color:#633806;background:#FAEEDA;border-radius:6px;padding:4px 8px;margin-top:8px">Making this '+taskP1days+' times this week — multiply ingredient quantities by '+taskP1days+'.</div>');
+      }
+      p.push('<div class="psteps" id="ps-'+tid+'">');
+
+      steps.forEach(function(s,i){
+        p.push('<div class="pstep"><div class="psnum">'+(i+1)+'</div><div class="pstxt">'+s+'</div></div>');
+      });
+      p.push('<div class="ptip"><strong>Tip:</strong> '+t.tip+'</div>');
+      p.push('</div>');
+      p.push('<div class="done-wrap"><input type="checkbox" id="dn-'+tid+'" data-tid="'+tid+'" onchange="markDone(this.dataset.tid,this)"><label for="dn-'+tid+'">Mark as done</label></div>');
+      p.push('</div>');
+    });
+  });
+  el.innerHTML = p.join('');
+}
+
+function showMain(id,btn){
+  document.querySelectorAll('.main-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.main-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('main-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='grocery') updateGrocery();
+  if(id==='prep')    updatePrep();
+}
+function showSub(id,btn){
+  document.querySelectorAll('.sub-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.sub-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('sub-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+function showGCat(id,btn){
+  document.querySelectorAll('.gpanel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.cat-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  renderPanel(id);
+}
+function onToggle(cb){
+  var card = cb.closest('.recipe');
+  var rid  = card.dataset.recipe;
+  if(cb.checked){ delete excl[rid]; card.classList.remove('excluded'); }
+  else { excl[rid]=true; card.classList.add('excluded'); }
+  cascade();
+}
+function onDaysAdj(btn,delta,person){
+  var card = btn.closest('.recipe');
+  var rid  = card.dataset.recipe;
+  var valEl = btn.parentElement.querySelector('.days-val');
+  if(person===2){
+    var cur = getDays2(rid);
+    var next = Math.min(7, Math.max(1, cur + delta));
+    days2[rid] = next;
+    valEl.textContent = next;
+  } else {
+    var cur = getDays(rid);
+    var next = Math.min(7, Math.max(1, cur + delta));
+    days[rid] = next;
+    valEl.textContent = next;
+  }
+  cascade();
+}
+
+function onServ(btn,n){
+  var card = btn.closest('.recipe');
+  var rid  = card.dataset.recipe;
+  serv[rid]=n;
+  card.querySelectorAll('.srv').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  // Show/hide Person 2 days control and update Person 1 label
+  var p2 = card.querySelector('.p2days');
+  var p1lbl = card.querySelector('.p1lbl');
+  if(n===2){
+    if(p2) p2.style.display='';
+    if(p1lbl) p1lbl.textContent='Person 1 days/week:';
+  } else {
+    if(p2) p2.style.display='none';
+    if(p1lbl) p1lbl.textContent='Days/week:';
+  }
+  // Remove x2 annotation (no longer needed since we track independently)
+  var annot = card.querySelector('.scale-annot');
+  if(annot) annot.remove();
+  cascade();
+}
+function deleteRecipe(btn){
+  var card = btn.closest('.recipe');
+  if(!card) return;
+  var rid = card.dataset.recipe;
+  // Clean up state
+  delete excl[rid];
+  delete serv[rid];
+  delete days[rid];
+  delete days2[rid];
+  // Animate and remove
+  card.style.transition = 'opacity 0.2s, transform 0.2s';
+  card.style.opacity = '0';
+  card.style.transform = 'translateX(10px)';
+  setTimeout(function(){
+    card.remove();
+    cascade();
+  }, 200);
+}
+
+function cascade(){
+  var ap = document.querySelector('.main-panel.active');
+  if(!ap) return;
+  if(ap.id==='main-grocery') updateGrocery();
+  if(ap.id==='main-prep')    updatePrep();
+  autoSave();
+}
+function togItem(el){
+  var id=el.id;
+  var now=!el.classList.contains('chk');
+  chkd[id]=now;
+  el.classList.toggle('chk',now);
+  var cb=el.querySelector('input'); if(cb) cb.checked=now;
+  updateProgress();
+  if(typeof autoSave==='function') autoSave();
+}
+function checkAll(){
+  document.querySelectorAll('#g-all .gi').forEach(function(el){
+    chkd[el.id]=true; el.classList.add('chk');
+    var cb=el.querySelector('input'); if(cb) cb.checked=true;
+  });
+  updateProgress();
+}
+function uncheckAll(){
+  document.querySelectorAll('#g-all .gi').forEach(function(el){
+    chkd[el.id]=false; el.classList.remove('chk');
+    var cb=el.querySelector('input'); if(cb) cb.checked=false;
+  });
+  updateProgress();
+}
+function togSteps(tid,btn){
+  var el=document.getElementById('ps-'+tid);
+  if(!el) return;
+  var open=el.classList.toggle('open');
+  btn.textContent=open?'Hide steps':'Show steps';
+}
+function markDone(tid,cb){
+  var card=document.getElementById('pc-'+tid);
+  if(card) card.classList.toggle('done',cb.checked);
+}
+updateGrocery();
+
+// ── AI Recipe Finder ────────────────────────────────────────────────────────
+
+var AI_SYSTEM = "You are a nutritionist and chef helping a 27-year-old woman (4'11, 108lb) plan meals for the week. " +
+  "She has: hypothyroidism (on levothyroxine), prolactinoma (on cabergoline), iron deficiency (low iron stores, high TIBC), " +
+  "migraines, and recent H. pylori treatment (2 months ago, recovering). " +
+  "Her current GI issues cause nausea, heartburn, and repulsion from eggs. No eggs in any recipe. " +
+  "Focus on: iron-rich foods (beef, chicken thighs, salmon, lentils, spinach, pumpkin seeds), " +
+  "vitamin C pairing with iron, anti-inflammatory ingredients, selenium for thyroid (salmon), " +
+  "gentle GI foods (white rice, sweet potato, banana, cooked veg), avoiding raw cruciferous veg. " +
+  "Dairy is OK in moderation but avoid high-fat dairy. " +
+  "When asked for a recipe, respond ONLY with valid JSON in this exact format (no markdown, no extra text): " +
+  '{"title":"Recipe Name","serves":"Serves 1","time":"X min","tags":["iron","gentle GI"],' +
+  '"ingredients":[{"amt":"1 cup","name":"ingredient name"}],' +
+  '"steps":["Step 1 text","Step 2 text"],"tip":"A helpful tip"}. ' +
+  "Valid tags: iron, anti-inflam, thyroid, gentle GI, vitamin C, probiotic. " +
+  "All quantities must be for 1 person.";
+
+var aiMessages = [];
+var addedRecipes = {};
+
+function useChip(btn){
+  document.getElementById('ai-input').value = btn.textContent;
+  sendAI();
+}
+
+function sendAI(){
+  var input = document.getElementById('ai-input');
+  var query = input.value.trim();
+  if(!query) return;
+  var sendBtn = document.getElementById('ai-send-btn');
+  sendBtn.disabled = true;
+  input.value = '';
+  addBubble('user', query);
+  var thinkId = 'think-'+Date.now();
+  addBubble('thinking', 'Finding a recipe for you...', thinkId);
+  aiMessages.push({role:'user', content:'Please suggest a recipe: '+query});
+  var apiKey = (window.ANTHROPIC_API_KEY) || '';
+  fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1000,
+      system:AI_SYSTEM,
+      messages:aiMessages
+    })
+  })
+  .then(function(res){ return res.json(); })
+  .then(function(data){
+    var thinkEl = document.getElementById(thinkId);
+    if(thinkEl) thinkEl.remove();
+    if(data.error){
+      addBubble('assistant','<div class="ai-error">Could not connect. Make sure this app is hosted on GitHub Pages with your API key configured.</div>');
+      aiMessages.pop(); sendBtn.disabled=false; return;
+    }
+    var text = data.content && data.content[0] && data.content[0].text;
+    if(!text){ addBubble('assistant','<div class="ai-error">No response received.</div>'); sendBtn.disabled=false; return; }
+    aiMessages.push({role:'assistant',content:text});
+    try{
+      var clean = text.replace(/```json|```/g,'').trim();
+      var recipe = JSON.parse(clean);
+      renderAIRecipe(recipe);
+    }catch(e){
+      addBubble('assistant', text.replace(/\n/g,'<br>'));
+    }
+    sendBtn.disabled=false;
+  })
+  .catch(function(){
+    var thinkEl = document.getElementById(thinkId);
+    if(thinkEl) thinkEl.remove();
+    addBubble('assistant','<div class="ai-error">Connection error. This feature requires the app to be hosted on GitHub Pages with an API key. See the setup banner above.</div>');
+    aiMessages.pop(); sendBtn.disabled=false;
+  });
+}
+
+function addBubble(type, html, id){
+  var history = document.getElementById('ai-history');
+  var div = document.createElement('div');
+  div.className = 'ai-bubble '+type;
+  if(id) div.id = id;
+  div.innerHTML = html;
+  history.appendChild(div);
+  div.scrollIntoView({behavior:'smooth',block:'nearest'});
+  return div;
+}
+
+function renderAIRecipe(r){
+  var history = document.getElementById('ai-history');
+  var recipeId = 'ai-'+Date.now();
+  var TAG_COLORS = {iron:'t-iron','anti-inflam':'t-anti',thyroid:'t-thyroid','gentle GI':'t-gut','vitamin C':'t-vc',probiotic:'t-pro'};
+  var tagsHtml = (r.tags||[]).map(function(t){ return '<span class="tag '+(TAG_COLORS[t]||'badge')+'">'+t+'</span>'; }).join('');
+  var ingsHtml = (r.ingredients||[]).map(function(ing){
+    return '<div class="ai-recipe-ing"><span class="ing-amt">'+ing.amt+'</span>'+ing.name+'</div>';
+  }).join('');
+  var stepsHtml = (r.steps||[]).map(function(s,i){
+    return '<div class="ai-recipe-step"><div class="ai-step-n">'+(i+1)+'</div><div>'+s+'</div></div>';
+  }).join('');
+  var rJson = JSON.stringify(r);
+  var card = document.createElement('div');
+  card.className = 'ai-recipe-card';
+  card.id = recipeId;
+  card.innerHTML =
+    '<div class="ai-recipe-title">'+r.title+'</div>'+
+    '<div class="ai-recipe-meta"><span class="badge">'+(r.serves||'Serves 1')+'</span> <span class="badge">'+(r.time||'')+'</span></div>'+
+    '<div class="tags">'+tagsHtml+'</div>'+
+    '<div class="ai-recipe-section">Ingredients</div>'+ingsHtml+
+    '<div class="ai-recipe-section">Steps</div>'+stepsHtml+
+    (r.tip?'<div class="tip"><span class="tip-label">Tip</span> '+r.tip+'</div>':'')+
+    '<button class="ai-add-btn" data-rid="'+recipeId+'" onclick="addAIRecipe(this,this.dataset.rid)">+ Add to my recipes</button>';
+  window['_aiRecipe_'+recipeId] = r;
+  history.appendChild(card);
+  card.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function addAIRecipe(btn, recipeId){
+  recipeId = recipeId || btn.dataset.rid;
+  if(addedRecipes[recipeId]) return;
+  addedRecipes[recipeId] = true;
+  var r = window['_aiRecipe_'+recipeId];
+  if(!r) return;
+  var TAG_COLORS = {iron:'t-iron','anti-inflam':'t-anti',thyroid:'t-thyroid','gentle GI':'t-gut','vitamin C':'t-vc',probiotic:'t-pro'};
+  var tagsHtml = (r.tags||[]).map(function(t){ return '<span class="tag '+(TAG_COLORS[t]||'badge')+'">'+t+'</span>'; }).join('');
+  var ingsHtml = (r.ingredients||[]).map(function(ing){
+    return '<div class="ing-item"><span class="ing-amt">'+ing.amt+'</span>'+ing.name+'</div>';
+  }).join('');
+  var stepsHtml = (r.steps||[]).map(function(s,i){
+    return '<div class="step"><div class="step-num">'+(i+1)+'</div><div class="step-text">'+s+'</div></div>';
+  }).join('');
+  var rid = 'airecipe-'+Date.now();
+  var html =
+    '<div class="recipe" data-recipe="'+rid+'">'+
+    '<div class="r-header"><div class="r-header-left">'+
+    '<div class="r-title">'+r.title+' <span class="new-badge">AI suggested</span></div>'+
+    '<div class="r-meta"><span class="badge">'+(r.serves||'Serves 1')+'</span><span class="badge">'+(r.time||'')+'</span></div>'+
+    '<div class="tags">'+tagsHtml+'</div>'+
+    '</div>'+
+    '<div class="rc">'+
+    '<div class="inc-wrap"><span class="inc-lbl">Include</span><label class="tog"><input type="checkbox" checked onchange="onToggle(this)"><span class="sl"></span></label></div>'+
+    '<div class="srv-wrap"><button class="srv active" onclick="onServ(this,1)">1 person</button><button class="srv" onclick="onServ(this,2)">2 people</button></div>'+
+    '<div class="days-wrap"><div class="p1days"><span class="days-lbl p1lbl">Days/week:</span><div class="days-ctrl"><button class="days-btn" onclick="onDaysAdj(this,-1,1)">-</button><span class="days-val" data-person="1">1</span><button class="days-btn" onclick="onDaysAdj(this,1,1)">+</button></div></div>'+
+    '<div class="p2days" style="display:none"><span class="days-lbl" style="color:#378ADD">Person 2 days/week:</span><div class="days-ctrl" style="border-color:#85B7EB"><button class="days-btn" onclick="onDaysAdj(this,-1,2)">-</button><span class="days-val" data-person="2">1</span><button class="days-btn" onclick="onDaysAdj(this,1,2)">+</button></div></div></div>'+
+    '</div></div>'+
+    '<div class="r-body"><div><div class="r-section-title">Ingredients</div>'+ingsHtml+'</div>'+
+    '<div><div class="r-section-title">Steps</div>'+stepsHtml+'</div></div>'+
+    (r.tip?'<div class="tip"><span class="tip-label">Tip</span> '+r.tip+'</div>':'')+
+    '</div>';
+  var activeSub = document.querySelector('.sub-panel.active');
+  if(activeSub){
+    var tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    activeSub.insertBefore(tmp.firstChild, activeSub.firstChild);
+  }
+  btn.textContent = 'Added to Recipes!';
+  btn.classList.add('added');
+  setTimeout(function(){
+    document.querySelector('.main-tab').click();
+  }, 700);
+}
+
+// ── User / profile management ────────────────────────────────────────────────
+
+var USER_COLORS = ['#1D9E75','#378ADD','#E24B4A','#BA7517','#7F77DD','#D4537E','#639922','#5f5e5a'];
+var DEFAULT_STATE = {excl:{}, serv:{}, days:{}, days2:{}, chkd:{}};
+
+function getUsers(){
+  try{ return JSON.parse(localStorage.getItem('mp_users')||'null') || [{id:'default',name:'Default',color:'#1D9E75'}]; }
+  catch(e){ return [{id:'default',name:'Default',color:'#1D9E75'}]; }
+}
+function saveUsers(u){ localStorage.setItem('mp_users', JSON.stringify(u)); }
+function getCurrentUserId(){ return localStorage.getItem('mp_current_user') || 'default'; }
+function setCurrentUserId(id){ localStorage.setItem('mp_current_user', id); }
+
+function loadUserState(uid){
+  try{ var r=localStorage.getItem('mp_state_'+uid); return r?JSON.parse(r):JSON.parse(JSON.stringify(DEFAULT_STATE)); }
+  catch(e){ return JSON.parse(JSON.stringify(DEFAULT_STATE)); }
+}
+
+function saveCurrentState(){
+  var uid = getCurrentUserId();
+  localStorage.setItem('mp_state_'+uid, JSON.stringify({excl:excl,serv:serv,days:days,days2:days2,chkd:chkd}));
+  var ind = document.getElementById('save-indicator');
+  if(ind){ ind.classList.add('show'); clearTimeout(ind._t); ind._t=setTimeout(function(){ind.classList.remove('show');},1500); }
+}
+
+function applyState(state){
+  excl  = state.excl  || {};
+  serv  = state.serv  || {};
+  days  = state.days  || {};
+  days2 = state.days2 || {};
+  chkd  = state.chkd  || {};
+  document.querySelectorAll('.recipe').forEach(function(card){
+    var rid = card.dataset.recipe;
+    if(!rid) return;
+    // Include toggle
+    var cb = card.querySelector('.tog input');
+    if(cb){ cb.checked = !excl[rid]; card.classList.toggle('excluded', !!excl[rid]); }
+    // Serving buttons
+    var s = serv[rid] || 1;
+    card.querySelectorAll('.srv').forEach(function(b){
+      var isOne = b.getAttribute('onclick') && b.getAttribute('onclick').indexOf(',1)')>-1;
+      var isTwo = b.getAttribute('onclick') && b.getAttribute('onclick').indexOf(',2)')>-1;
+      b.classList.toggle('active', (s===1&&isOne)||(s===2&&isTwo));
+    });
+    // Person 2 visibility
+    var p2=card.querySelector('.p2days'), p1lbl=card.querySelector('.p1lbl');
+    if(p2) p2.style.display = s===2?'':'none';
+    if(p1lbl) p1lbl.textContent = s===2?'Person 1 days/week:':'Days/week:';
+    // Days values
+    var d1=days[rid]||1, d2=days2[rid]||1;
+    card.querySelectorAll('.days-val').forEach(function(el){
+      el.textContent = el.dataset.person==='2' ? d2 : d1;
+    });
+    // Remove any stale scale-annot
+    var annot=card.querySelector('.scale-annot'); if(annot) annot.remove();
+  });
+  updateGrocery();
+}
+
+function updateUserBar(){
+  var users=getUsers(), uid=getCurrentUserId();
+  var user=users.find(function(u){return u.id===uid;})||users[0];
+  var av=document.getElementById('user-avatar'), nm=document.getElementById('user-name-display');
+  if(av){av.textContent=user.name.charAt(0).toUpperCase();av.style.background=user.color||'#1D9E75';}
+  if(nm) nm.textContent=user.name;
+}
+
+function renderUserList(){
+  var users=getUsers(), uid=getCurrentUserId();
+  var list=document.getElementById('user-list');
+  if(!list) return;
+  list.innerHTML=users.map(function(u){
+    var act=u.id===uid, canDel=users.length>1;
+    return '<div class="user-list-item'+(act?' active-user':'')+'" data-uid="'+u.id+'" onclick="switchUser(this.dataset.uid)">'
+      +'<div class="user-list-avatar" style="background:'+(u.color||'#888780')+'">'+u.name.charAt(0).toUpperCase()+'</div>'
+      +'<span class="user-list-name">'+u.name+(act?' <span style="font-size:10px;color:#1D9E75">(current)</span>':'')+'</span>'
+      +(canDel?'<button class="user-list-del" data-uid="'+u.id+'" onclick="event.stopPropagation();deleteUser(this.dataset.uid)" title="Delete">&#215;</button>':'')
+      +'</div>';
+  }).join('');
+}
+
+function openUserModal(){ renderUserList(); document.getElementById('user-modal-bg').classList.add('open'); }
+function closeUserModal(){ document.getElementById('user-modal-bg').classList.remove('open'); }
+
+function switchUser(uid){
+  if(uid===getCurrentUserId()){closeUserModal();return;}
+  saveCurrentState();
+  setCurrentUserId(uid);
+  applyState(loadUserState(uid));
+  updateUserBar();
+  closeUserModal();
+}
+
+function addUser(){
+  var input=document.getElementById('user-add-input');
+  var name=(input.value||'').trim();
+  if(!name) return;
+  var users=getUsers();
+  if(users.length>=8){alert('Maximum 8 profiles.');return;}
+  var id='user_'+Date.now();
+  var color=USER_COLORS[users.length%USER_COLORS.length];
+  users.push({id:id,name:name,color:color});
+  saveUsers(users);
+  localStorage.setItem('mp_state_'+id, JSON.stringify(JSON.parse(JSON.stringify(DEFAULT_STATE))));
+  input.value='';
+  renderUserList();
+}
+
+function deleteUser(uid){
+  var users=getUsers();
+  if(users.length<=1) return;
+  if(!confirm('Delete this profile and all its saved settings?')) return;
+  users=users.filter(function(u){return u.id!==uid;});
+  saveUsers(users);
+  localStorage.removeItem('mp_state_'+uid);
+  if(getCurrentUserId()===uid){
+    setCurrentUserId(users[0].id);
+    applyState(loadUserState(users[0].id));
+    updateUserBar();
+  }
+  renderUserList();
+}
+
+function autoSave(){ if(typeof saveCurrentState==='function') saveCurrentState(); }
+
+// ── Init ──────────────────────────────────────────────────────────────────
+(function initUsers(){
+  var users=getUsers();
+  if(!users.find(function(u){return u.id==='default';})){
+    users.unshift({id:'default',name:'Default',color:'#1D9E75'});
+    saveUsers(users);
+  }
+  var uid=getCurrentUserId();
+  if(!users.find(function(u){return u.id===uid;})) setCurrentUserId('default');
+  updateUserBar();
+  var state=loadUserState(getCurrentUserId());
+  var hasData=Object.keys(state.excl||{}).length||Object.keys(state.serv||{}).length||Object.keys(state.days||{}).length;
+  if(hasData) applyState(state);
+})();
+
+</script>
+</body>
+</html>
